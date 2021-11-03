@@ -8,7 +8,8 @@ class DataBase:
     def __init__(self):
         self.__client = MongoClient('localhost', 27017)
         self.__db = self.__client.covid
-        self.__observations = self.__db.observations
+        self.__cases = self.__db.cases
+        self.__vaccinations = self.__db.vaccinations
         self.__countries = self.__db.countries
 
     @staticmethod
@@ -54,18 +55,18 @@ class DataBase:
         :return:
         """
         first_stage = self.__get_first_stage_of_aggregate(countries, left_bound, right_bound)
-        return list(self.__observations.aggregate([
+        return list(self.__cases.aggregate([
             first_stage, {
                 '$group': {
                     '_id': '$iso_code',
                     'max_disease_new_cases': {
-                        '$max': '$disease.new_cases'
+                        '$max': 'new_cases'
                     },
                     'min_disease_new_cases': {
-                        '$min': '$disease.new_cases'
+                        '$min': 'new_cases'
                     },
                     'avg_disease_new_cases': {
-                        '$avg': '$disease.new_cases'
+                        '$avg': 'new_cases'
                     }
                 }
             }, {
@@ -95,12 +96,12 @@ class DataBase:
         """
         first_stage = self.__get_first_stage_of_aggregate(countries, left_bound, right_bound)
         return list(
-            self.__observations.aggregate([
+            self.__vaccinations.aggregate([
                 first_stage, {
                     '$group': {
                         '_id': '$iso_code',
                         'max_new_vaccinations': {
-                            '$max': '$vaccination.new_vaccinations'
+                            '$max': 'new_vaccinations'
                         }
                     }
                 }, {
@@ -128,12 +129,12 @@ class DataBase:
         :return:
         """
         first_stage = self.__get_first_stage_of_aggregate(countries, left_bound, right_bound)
-        return list(self.__observations.aggregate([
+        return list(self.__cases.aggregate([
             first_stage, {
                 '$group': {
                     '_id': '$iso_code',
                     'total_cases': {
-                        '$sum': '$disease.new_cases'
+                        '$sum': 'new_cases'
                     }
                 }
             }, {
@@ -160,12 +161,12 @@ class DataBase:
         :return:
         """
         first_stage = self.__get_first_stage_of_aggregate(countries, left_bound, right_bound)
-        return list(self.__observations.aggregate([
+        return list(self.__cases.aggregate([
             first_stage, {
                 '$group': {
                     '_id': '$date',
                     'sum_disease_new_cases': {
-                        '$sum': '$disease.new_cases'
+                        '$sum': '$new_cases'
                     }
                 }
             }, {
@@ -182,13 +183,19 @@ class DataBase:
             left_bound: datetime = None,
             right_bound: datetime = None
     ):
+        """
+        график зависимости заболевших в стране от плотности населения
+        :param left_bound:
+        :param right_bound:
+        :return:
+        """
         first_stage = self.__get_first_stage_of_aggregate(left_bound=left_bound, right_bound=right_bound)
-        return list(self.__observations.aggregate([
+        return list(self.__cases.aggregate([
             first_stage, {
                 '$group': {
                     '_id': '$iso_code',
                     'total_cases': {
-                        '$sum': '$disease.new_cases'
+                        '$sum': '$new_cases'
                     }
                 }
             }, {
@@ -222,3 +229,42 @@ class DataBase:
                 }
             }
         ]))
+
+    def __clear_db(self):
+        self.__cases.drop()
+        self.__countries.drop()
+        self.__vaccinations.drop()
+
+    def __add_countries(self, countries):
+        return self.__countries.insert_many(countries)
+
+    def parse_data(self):
+        if __name__ != '__main__':
+            raise Exception("Do not call this function outside database.py")
+
+        self.__clear_db()
+        import json
+        with open('../owid-covid-data.json') as fp:
+            data = json.load(fp)
+        countries = []
+        for iso_code, value in data.items():
+            countries.append(dict(
+                iso_code=iso_code,
+                continent=value.get('continent', None),
+                location=value.get('location', None),
+                population=value.get('population', None),
+                population_density=value.get('population_density', None),
+                median_age=value.get('median_age', None),
+                aged_65_older=value.get('aged_65_older', None),
+                aged_70_older=value.get('aged_70_older', None),
+            ))
+        self.__add_countries(countries)
+
+
+def main():
+    db = DataBase()
+    db.parse_data()
+
+
+if __name__ == '__main__':
+    main()

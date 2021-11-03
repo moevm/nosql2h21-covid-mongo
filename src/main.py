@@ -14,7 +14,7 @@ def home_page():
 
 
 # getting info from db
-# need use filters like left/right bound and countries
+# TODO: need use filters like left/right bound and countries
 @app.route('/graph-of-dependence', endpoint='graph-of-dependence')
 def get_graph_of_dependence():
     return {'data': db.get_graph_of_dependence_of_cases()}
