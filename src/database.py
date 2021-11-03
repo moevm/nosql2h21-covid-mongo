@@ -238,17 +238,33 @@ class DataBase:
     def __add_countries(self, countries):
         return self.__countries.insert_many(countries)
 
+    def __add_cases(self, cases):
+        return self.__cases.insert_many(cases)
+
+    def __add_vaccinations(self, vaccinations):
+        return self.__cases.insert_many(vaccinations)
+
     def parse_data(self):
         if __name__ != '__main__':
             raise Exception("Do not call this function outside database.py")
+
+        def is_dict_null(d):
+            return False
+
+        def cast_to_int(n):
+            if n:
+                return int(n)
+            return n
 
         self.__clear_db()
         import json
         with open('../owid-covid-data.json') as fp:
             data = json.load(fp)
         countries = []
+        cases = []
+        vaccinations = []
         for iso_code, value in data.items():
-            countries.append(dict(
+            country = dict(
                 iso_code=iso_code,
                 continent=value.get('continent', None),
                 location=value.get('location', None),
@@ -257,8 +273,61 @@ class DataBase:
                 median_age=value.get('median_age', None),
                 aged_65_older=value.get('aged_65_older', None),
                 aged_70_older=value.get('aged_70_older', None),
-            ))
+            )
+            if not is_dict_null(country):
+                countries.append(country)
+            data = value.get('data', None)
+            if data:
+                for row in data:
+                    date = row.get('date', None)
+                    if date is None:
+                        print('Warning!', row)
+                        continue
+                    date = datetime.strptime(date, '%Y-%m-%d')
+
+                    total_cases = cast_to_int(row.get('total_cases', None))
+                    new_cases = cast_to_int(row.get('new_cases', None))
+                    new_cases_smoothed = row.get('new_cases_smoothed', None)
+                    total_cases_per_million = row.get('total_cases_per_million', None)
+                    new_cases_per_million = row.get('new_cases_per_million', None)
+                    new_cases_smoothed_per_million = row.get('new_cases_smoothed_per_million', None)
+                    case = dict(
+                        date=date,
+                        iso_code=iso_code,
+                        total_cases=total_cases,
+                        new_cases=new_cases,
+                        new_cases_smoothed=new_cases_smoothed,
+                        total_cases_per_million=total_cases_per_million,
+                        new_cases_per_million=new_cases_per_million,
+                        new_cases_smoothed_per_million=new_cases_smoothed_per_million
+                    )
+                    if not is_dict_null(case):
+                        cases.append(case)
+
+                    people_vaccinated = cast_to_int(row.get('people_vaccinated', None))
+                    people_fully_vaccinated = cast_to_int(row.get('people_fully_vaccinated', None))
+                    new_vaccinations = cast_to_int(row.get('new_vaccinations', None))
+                    new_vaccinations_smoothed = row.get('new_vaccinations_smoothed', None)
+                    total_vaccinations_per_hundred = row.get('total_vaccinations_per_hundred', None)
+                    people_vaccinated_per_hundred = row.get('people_vaccinated_per_hundred', None)
+                    people_fully_vaccinated_per_hundred = row.get('people_fully_vaccinated_per_hundred', None)
+                    new_vaccinations_smoothed_per_million = row.get('new_vaccinations_smoothed_per_million', None)
+                    vaccination = dict(
+                        people_vaccinated=people_vaccinated,
+                        people_fully_vaccinated=people_fully_vaccinated,
+                        new_vaccinations=new_vaccinations,
+                        new_vaccinations_smoothed=new_vaccinations_smoothed,
+                        total_vaccinations_per_hundred=total_vaccinations_per_hundred,
+                        people_vaccinated_per_hundred=people_vaccinated_per_hundred,
+                        people_fully_vaccinated_per_hundred=people_fully_vaccinated_per_hundred,
+                        new_vaccinations_smoothed_per_million=new_vaccinations_smoothed_per_million
+                    )
+                    if not is_dict_null(vaccination):
+                        vaccinations.append(vaccination)
+
         self.__add_countries(countries)
+        self.__add_cases(cases)
+        self.__add_vaccinations(vaccinations)
 
 
 def main():
