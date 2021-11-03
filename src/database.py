@@ -60,13 +60,13 @@ class DataBase:
                 '$group': {
                     '_id': '$iso_code',
                     'max_disease_new_cases': {
-                        '$max': 'new_cases'
+                        '$max': '$new_cases'
                     },
                     'min_disease_new_cases': {
-                        '$min': 'new_cases'
+                        '$min': '$new_cases'
                     },
                     'avg_disease_new_cases': {
-                        '$avg': 'new_cases'
+                        '$avg': '$new_cases'
                     }
                 }
             }, {
@@ -101,7 +101,7 @@ class DataBase:
                     '$group': {
                         '_id': '$iso_code',
                         'max_new_vaccinations': {
-                            '$max': 'new_vaccinations'
+                            '$max': '$new_vaccinations'
                         }
                     }
                 }, {
@@ -134,7 +134,7 @@ class DataBase:
                 '$group': {
                     '_id': '$iso_code',
                     'total_cases': {
-                        '$sum': 'new_cases'
+                        '$sum': '$new_cases'
                     }
                 }
             }, {
@@ -242,14 +242,17 @@ class DataBase:
         return self.__cases.insert_many(cases)
 
     def __add_vaccinations(self, vaccinations):
-        return self.__cases.insert_many(vaccinations)
+        return self.__vaccinations.insert_many(vaccinations)
 
     def parse_data(self):
         if __name__ != '__main__':
             raise Exception("Do not call this function outside database.py")
 
         def is_dict_null(d):
-            return False
+            dict_is_null = True
+            for k, v in d.items():
+                dict_is_null &= v is None
+            return dict_is_null
 
         def cast_to_int(n):
             if n:
@@ -281,7 +284,6 @@ class DataBase:
                 for row in data:
                     date = row.get('date', None)
                     if date is None:
-                        print('Warning!', row)
                         continue
                     date = datetime.strptime(date, '%Y-%m-%d')
 
@@ -292,8 +294,6 @@ class DataBase:
                     new_cases_per_million = row.get('new_cases_per_million', None)
                     new_cases_smoothed_per_million = row.get('new_cases_smoothed_per_million', None)
                     case = dict(
-                        date=date,
-                        iso_code=iso_code,
                         total_cases=total_cases,
                         new_cases=new_cases,
                         new_cases_smoothed=new_cases_smoothed,
@@ -302,28 +302,34 @@ class DataBase:
                         new_cases_smoothed_per_million=new_cases_smoothed_per_million
                     )
                     if not is_dict_null(case):
-                        cases.append(case)
+                        cases.append({
+                            **dict(date=date, iso_code=iso_code),
+                            **case
+                        })
 
-                    people_vaccinated = cast_to_int(row.get('people_vaccinated', None))
-                    people_fully_vaccinated = cast_to_int(row.get('people_fully_vaccinated', None))
-                    new_vaccinations = cast_to_int(row.get('new_vaccinations', None))
-                    new_vaccinations_smoothed = row.get('new_vaccinations_smoothed', None)
-                    total_vaccinations_per_hundred = row.get('total_vaccinations_per_hundred', None)
-                    people_vaccinated_per_hundred = row.get('people_vaccinated_per_hundred', None)
-                    people_fully_vaccinated_per_hundred = row.get('people_fully_vaccinated_per_hundred', None)
-                    new_vaccinations_smoothed_per_million = row.get('new_vaccinations_smoothed_per_million', None)
-                    vaccination = dict(
-                        people_vaccinated=people_vaccinated,
-                        people_fully_vaccinated=people_fully_vaccinated,
-                        new_vaccinations=new_vaccinations,
-                        new_vaccinations_smoothed=new_vaccinations_smoothed,
-                        total_vaccinations_per_hundred=total_vaccinations_per_hundred,
-                        people_vaccinated_per_hundred=people_vaccinated_per_hundred,
-                        people_fully_vaccinated_per_hundred=people_fully_vaccinated_per_hundred,
-                        new_vaccinations_smoothed_per_million=new_vaccinations_smoothed_per_million
-                    )
-                    if not is_dict_null(vaccination):
-                        vaccinations.append(vaccination)
+                        people_vaccinated = cast_to_int(row.get('people_vaccinated', None))
+                        people_fully_vaccinated = cast_to_int(row.get('people_fully_vaccinated', None))
+                        new_vaccinations = cast_to_int(row.get('new_vaccinations', None))
+                        new_vaccinations_smoothed = row.get('new_vaccinations_smoothed', None)
+                        total_vaccinations_per_hundred = row.get('total_vaccinations_per_hundred', None)
+                        people_vaccinated_per_hundred = row.get('people_vaccinated_per_hundred', None)
+                        people_fully_vaccinated_per_hundred = row.get('people_fully_vaccinated_per_hundred', None)
+                        new_vaccinations_smoothed_per_million = row.get('new_vaccinations_smoothed_per_million', None)
+                        vaccination = dict(
+                            people_vaccinated=people_vaccinated,
+                            people_fully_vaccinated=people_fully_vaccinated,
+                            new_vaccinations=new_vaccinations,
+                            new_vaccinations_smoothed=new_vaccinations_smoothed,
+                            total_vaccinations_per_hundred=total_vaccinations_per_hundred,
+                            people_vaccinated_per_hundred=people_vaccinated_per_hundred,
+                            people_fully_vaccinated_per_hundred=people_fully_vaccinated_per_hundred,
+                            new_vaccinations_smoothed_per_million=new_vaccinations_smoothed_per_million
+                        )
+                        if not is_dict_null(vaccination):
+                            vaccinations.append({
+                                **dict(date=date, iso_code=iso_code),
+                                **vaccination
+                            })
 
         self.__add_countries(countries)
         self.__add_cases(cases)
