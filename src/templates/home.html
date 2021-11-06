@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block main %}
+    Home page
+    <table class="table table-bordered table-hover">
+        <caption style="caption-side: top;">Минимальное/среднее/максимальное количество новых заболевших
+        в сутки за весь период пандемии по странам</caption>
+        <thead>
+        <tr>
+            <th>iso code</th>
+            <th>max cases</th>
+            <th>min cases</th>
+            <th>avg cases</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for x in data %}
+            <tr>
+                <th scope="row">{{ x.iso_code }}</th>
+                <td>{{ x.max_disease_new_cases }}</td>
+                <td>{{ x.min_disease_new_cases }}</td>
+                <td>{{ x.avg_disease_new_cases }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+
