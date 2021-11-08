@@ -3,10 +3,12 @@ from typing import List
 
 from pymongo import MongoClient
 
+DATABASE_NAME = 'covid'
+
 
 class DataBase:
-    def __init__(self):
-        self.__client = MongoClient('localhost', 27017)
+    def __init__(self, username, password):
+        self.__client = MongoClient(f'mongodb://{username}:{password}@mongodb:27017/{DATABASE_NAME}?authSource=admin')
         self.__db = self.__client.covid
         self.__cases = self.__db.cases
         self.__vaccinations = self.__db.vaccinations
@@ -261,7 +263,7 @@ class DataBase:
 
         self.__clear_db()
         import json
-        with open('../owid-covid-data.json') as fp:
+        with open('owid-covid-data.json') as fp:
             data = json.load(fp)
         countries = []
         cases = []
@@ -337,7 +339,7 @@ class DataBase:
 
 
 def main():
-    db = DataBase()
+    db = DataBase('username', 'password')
     db.parse_data()
 
 

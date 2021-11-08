@@ -1,9 +1,10 @@
 from flask import Flask, render_template
 
 from database import DataBase
+import sys
 
 app = Flask(__name__)
-db = DataBase()
+db = DataBase(username=sys.argv[1], password=sys.argv[2])
 
 
 @app.route('/')
@@ -50,4 +51,4 @@ def all_links():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=8000, debug=True)
