@@ -252,19 +252,19 @@ class DataBase:
 
         def is_dict_null(d):
             dict_is_null = True
-            for k, v in d.items():
-                dict_is_null &= v is None
+            for dict_key, dict_value in d.items():
+                dict_is_null &= dict_value is None
             return dict_is_null
 
-        def cast_to_int(n):
-            if n:
-                return int(n)
-            return n
+        def cast_to_int(number):
+            if number:
+                return int(number)
+            return number
 
         self.__clear_db()
         import json
-        with open('owid-covid-data.json') as fp:
-            data = json.load(fp)
+        with open('owid-covid-data.json') as file:
+            data = json.load(file)
         countries = []
         cases = []
         vaccinations = []
@@ -339,8 +339,8 @@ class DataBase:
 
 
 def main():
-    db = DataBase('username', 'password')
-    db.parse_data()
+    database = DataBase('username', 'password')
+    database.parse_data()
 
 
 if __name__ == '__main__':

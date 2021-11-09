@@ -1,7 +1,8 @@
+import sys
+
 from flask import Flask, render_template
 
 from database import DataBase
-import sys
 
 app = Flask(__name__)
 db = DataBase(username=sys.argv[1], password=sys.argv[2])
