@@ -1,3 +1,9 @@
+"""
+docstring
+database helper
+"""
+
+import json
 from datetime import datetime
 from typing import List
 
@@ -7,8 +13,15 @@ DATABASE_NAME = 'covid'
 
 
 class DataBase:
+    """
+    docstring
+    class database
+    """
+
     def __init__(self, username, password):
-        self.__client = MongoClient(f'mongodb://{username}:{password}@mongodb:27017/{DATABASE_NAME}?authSource=admin')
+        self.__client = MongoClient(
+            f'mongodb://{username}:{password}@mongodb:27017/{DATABASE_NAME}?authSource=admin'
+        )
         self.__db = self.__client.covid
         self.__cases = self.__db.cases
         self.__vaccinations = self.__db.vaccinations
@@ -191,7 +204,9 @@ class DataBase:
         :param right_bound:
         :return:
         """
-        first_stage = self.__get_first_stage_of_aggregate(left_bound=left_bound, right_bound=right_bound)
+        first_stage = self.__get_first_stage_of_aggregate(
+            left_bound=left_bound, right_bound=right_bound
+        )
         return list(self.__cases.aggregate([
             first_stage, {
                 '$group': {
@@ -252,7 +267,7 @@ class DataBase:
 
         def is_dict_null(d):
             dict_is_null = True
-            for dict_key, dict_value in d.items():
+            for dict_value in d.values():
                 dict_is_null &= dict_value is None
             return dict_is_null
 
@@ -262,8 +277,7 @@ class DataBase:
             return number
 
         self.__clear_db()
-        import json
-        with open('owid-covid-data.json') as file:
+        with open('owid-covid-data.json', encoding='utf-8') as file:
             data = json.load(file)
         countries = []
         cases = []
@@ -309,14 +323,28 @@ class DataBase:
                             **case
                         })
 
-                        people_vaccinated = cast_to_int(row.get('people_vaccinated', None))
-                        people_fully_vaccinated = cast_to_int(row.get('people_fully_vaccinated', None))
-                        new_vaccinations = cast_to_int(row.get('new_vaccinations', None))
-                        new_vaccinations_smoothed = row.get('new_vaccinations_smoothed', None)
-                        total_vaccinations_per_hundred = row.get('total_vaccinations_per_hundred', None)
-                        people_vaccinated_per_hundred = row.get('people_vaccinated_per_hundred', None)
-                        people_fully_vaccinated_per_hundred = row.get('people_fully_vaccinated_per_hundred', None)
-                        new_vaccinations_smoothed_per_million = row.get('new_vaccinations_smoothed_per_million', None)
+                        people_vaccinated = cast_to_int(row.get(
+                            'people_vaccinated', None
+                        ))
+                        people_fully_vaccinated = cast_to_int(row.get(
+                            'people_fully_vaccinated', None
+                        ))
+                        new_vaccinations = cast_to_int(row.get(
+                            'new_vaccinations', None
+                        ))
+                        new_vaccinations_smoothed = row.get(
+                            'new_vaccinations_smoothed', None
+                        )
+                        total_vaccinations_per_hundred = row.get(
+                            'total_vaccinations_per_hundred', None
+                        )
+                        people_vaccinated_per_hundred = row.get(
+                            'people_vaccinated_per_hundred', None)
+                        people_fully_vaccinated_per_hundred = row.get(
+                            'people_fully_vaccinated_per_hundred', None)
+                        new_vaccinations_smoothed_per_million = row.get(
+                            'new_vaccinations_smoothed_per_million', None
+                        )
                         vaccination = dict(
                             people_vaccinated=people_vaccinated,
                             people_fully_vaccinated=people_fully_vaccinated,
@@ -339,6 +367,10 @@ class DataBase:
 
 
 def main():
+    """
+    function main
+    :return:
+    """
     database = DataBase('username', 'password')
     database.parse_data()
 
