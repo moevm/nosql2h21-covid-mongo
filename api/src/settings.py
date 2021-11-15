@@ -1,0 +1,4 @@
+import os
+
+MONGODB_USERNAME = os.environ.get('MONGO_INITDB_ROOT_USERNAME', '')
+MONGODB_PASSWORD = os.environ.get('MONGO_INITDB_ROOT_PASSWORD', '')

@@ -3,14 +3,13 @@ docstring
 main app
 """
 
-import sys
-
 from flask import Flask, render_template
 
+import settings 
 from database import DataBase
 
 app = Flask(__name__)
-db = DataBase(username=sys.argv[1], password=sys.argv[2])
+db = DataBase(username=settings.MONGODB_USERNAME, password=settings.MONGODB_PASSWORD)
 
 
 @app.route('/')
