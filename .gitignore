@@ -139,3 +139,7 @@ cython_debug/
 .idea/
 owid-covid-data.json
 db/
+
+# Node.js
+node_modules
+package-lock.json

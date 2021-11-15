@@ -1,12 +1,11 @@
 version: "3"
 
-
 services:
   mongodb:
     image: mongo
     restart: always
     volumes:
-      - ./db/:/data/db/
+      - ./db/:/data/db
     env_file: .env
     container_name: mongodb
 
@@ -14,7 +13,8 @@ services:
     build:
       context: ./api/
       dockerfile: Dockerfile
-    restart: unless-stopped
+    volumes:
+      - ./api/src:/app/src:ro
     env_file: .env
     depends_on:
       - mongodb
@@ -25,9 +25,11 @@ services:
   web:
     build:
       context: ./web/
-      dockerfile: Dockerfile.prod
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./web/src:/app/src:ro
     ports:
-      - 8080:80  
+      - 3000:3000
     depends_on:
       - api
     container_name: web
