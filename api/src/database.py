@@ -112,6 +112,19 @@ class DataBase:
         result.sort(key=operator.itemgetter('date'))
         return result[offset:offset + limit]
 
+    def get_meta_countries(self):
+        return list(self.__countries.find({}, {
+            'iso_code': 1,
+            'location': 1,
+            '_id': 0
+        }))
+
+    def get_country_info(self, iso_code):
+        return self.__countries.find_one(
+            {'iso_code': iso_code},
+            {'_id': 0}
+        )
+
     def get_number_of_new_cases(
             self,
             countries: List[str] = None,
