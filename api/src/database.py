@@ -68,24 +68,19 @@ class DataBase:
         result = list(self.__cases.aggregate([
             first_stage, {
                 '$group': {
-                    '_id': {
-                        'iso_code': '$iso_code',
-                        'date': '$date'
-                    },
+                    '_id': '$date',
                     'new_cases': {
                         '$sum': '$new_cases'
                     }
                 }
             }, {
                 '$project': {
-                    'iso_code': '$_id.iso_code',
-                    'date': '$_id.date',
+                    'date': '$_id',
                     'new_cases': '$new_cases',
                     '_id': 0
                 }
             }
         ]))
-        result.sort(key=operator.itemgetter('iso_code'))
         result.sort(key=operator.itemgetter('date'))
         return result[offset:offset + limit]
 
@@ -101,24 +96,19 @@ class DataBase:
         result = list(self.__vaccinations.aggregate([
             first_stage, {
                 '$group': {
-                    '_id': {
-                        'iso_code': '$iso_code',
-                        'date': '$date'
-                    },
+                    '_id': '$date',
                     'new_vaccinations': {
                         '$sum': '$new_vaccinations'
                     }
                 }
             }, {
                 '$project': {
-                    'iso_code': '$_id.iso_code',
-                    'date': '$_id.date',
+                    'date': '$_id',
                     'new_vaccinations': '$new_vaccinations',
                     '_id': 0
                 }
             }
         ]))
-        result.sort(key=operator.itemgetter('iso_code'))
         result.sort(key=operator.itemgetter('date'))
         return result[offset:offset + limit]
 
