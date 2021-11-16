@@ -1,13 +1,16 @@
-export const CASES = symbol("cases")
-export const VACCINATIONS = symbol("cases")
+export const CASES_PER_DAY = "cases_per_day"
+export const VACCS_PER_DAY = "vaccs_per_day"
 
 const ENDPOINTS = {
-    [CASES]: {
-        url: "/number-of-new-cases",
+    [CASES_PER_DAY]: {
+        uri: "/cases_per_day",
         method: "GET"
     },
 
-    [VACCINATIONS]: {
-        url: ""
+    [VACCS_PER_DAY]: {
+        uri: "/vax_per_day",
+        method: "GET"
     }
 }
+
+export default ENDPOINTS;
