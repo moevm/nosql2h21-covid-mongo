@@ -4,6 +4,7 @@ database helper
 """
 
 import json
+import operator
 from datetime import datetime
 from typing import List
 
@@ -54,6 +55,72 @@ class DataBase:
                 **dates
             }
         }
+
+    def get_cases_per_day(
+            self,
+            offset,
+            limit,
+            iso_code,
+            left_bound,
+            right_bound
+    ):
+        first_stage = self.__get_first_stage_of_aggregate([iso_code] if iso_code else None, left_bound, right_bound)
+        result = list(self.__cases.aggregate([
+            first_stage, {
+                '$group': {
+                    '_id': {
+                        'iso_code': '$iso_code',
+                        'date': '$date'
+                    },
+                    'new_cases': {
+                        '$sum': '$new_cases'
+                    }
+                }
+            }, {
+                '$project': {
+                    'iso_code': '$_id.iso_code',
+                    'date': '$_id.date',
+                    'new_cases': '$new_cases',
+                    '_id': 0
+                }
+            }
+        ]))
+        result.sort(key=operator.itemgetter('iso_code'))
+        result.sort(key=operator.itemgetter('date'))
+        return result[offset:offset + limit]
+
+    def get_vax_per_day(
+            self,
+            offset,
+            limit,
+            iso_code,
+            left_bound,
+            right_bound
+    ):
+        first_stage = self.__get_first_stage_of_aggregate([iso_code] if iso_code else None, left_bound, right_bound)
+        result = list(self.__vaccinations.aggregate([
+            first_stage, {
+                '$group': {
+                    '_id': {
+                        'iso_code': '$iso_code',
+                        'date': '$date'
+                    },
+                    'new_vaccinations': {
+                        '$sum': '$new_vaccinations'
+                    }
+                }
+            }, {
+                '$project': {
+                    'iso_code': '$_id.iso_code',
+                    'date': '$_id.date',
+                    'new_vaccinations': '$new_vaccinations',
+                    '_id': 0
+                }
+            }
+        ]))
+        result.sort(key=operator.itemgetter('iso_code'))
+        result.sort(key=operator.itemgetter('date'))
+        return result[offset:offset + limit]
 
     def get_number_of_new_cases(
             self,
