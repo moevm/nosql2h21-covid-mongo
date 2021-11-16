@@ -50,7 +50,10 @@ def get_country():
     iso_code = request.args.get('iso_code')
     if iso_code is None:
         return 'ISO code is required', 400
-    return {'data': db.get_country_info(iso_code)}
+    country = db.get_country_info(iso_code)
+    if country is None:
+        return 'ISO code not found', 404
+    return {'data': country}
 
 
 @app.route('/country-list', endpoint='country-list')
