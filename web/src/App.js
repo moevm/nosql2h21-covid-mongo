@@ -1,24 +1,33 @@
-import logo from './logo.svg';
-import './App.css';
+import Container from '@mui/material/Container';
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+
+import { useSelector } from 'react-redux';
+
+import Stats from 'components/Stats';
+
+const app_title = "Статиcтика COVID-19";
 
 function App() {
+  const store = useSelector(store => store);
+  console.log(store);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <AppBar position="relative">
+        <Toolbar>
+          <Container>
+            <Typography variant="h6" component="div">
+              {app_title}
+            </Typography>
+          </Container>
+        </Toolbar>
+      </AppBar>
+      <Container maxWidth="lg">
+        <Stats/>
+      </Container>
+    </>
   );
 }
 
