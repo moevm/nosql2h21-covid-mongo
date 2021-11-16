@@ -142,6 +142,10 @@ class DataBase:
         first_stage = self.__get_first_stage_of_aggregate(countries, left_bound, right_bound)
         return list(self.__cases.aggregate([
             first_stage, {
+                '$match': {
+                    'new_cases': {'$gte': 0}
+                }
+            }, {
                 '$group': {
                     '_id': '$iso_code',
                     'max_disease_new_cases': {
@@ -216,6 +220,10 @@ class DataBase:
         first_stage = self.__get_first_stage_of_aggregate(countries, left_bound, right_bound)
         return list(self.__cases.aggregate([
             first_stage, {
+                '$match': {
+                    'new_cases': {'$gte': 0}
+                }
+            }, {
                 '$group': {
                     '_id': '$iso_code',
                     'total_cases': {
@@ -248,6 +256,10 @@ class DataBase:
         first_stage = self.__get_first_stage_of_aggregate(countries, left_bound, right_bound)
         return list(self.__cases.aggregate([
             first_stage, {
+                '$match': {
+                    'new_cases': {'$gte': 0}
+                }
+            }, {
                 '$group': {
                     '_id': '$date',
                     'sum_disease_new_cases': {
@@ -279,6 +291,10 @@ class DataBase:
         )
         return list(self.__cases.aggregate([
             first_stage, {
+                '$match': {
+                    'new_cases': {'$gte': 0}
+                }
+            }, {
                 '$group': {
                     '_id': '$iso_code',
                     'total_cases': {
@@ -409,9 +425,11 @@ class DataBase:
                             'total_vaccinations_per_hundred', None
                         )
                         people_vaccinated_per_hundred = row.get(
-                            'people_vaccinated_per_hundred', None)
+                            'people_vaccinated_per_hundred', None
+                        )
                         people_fully_vaccinated_per_hundred = row.get(
-                            'people_fully_vaccinated_per_hundred', None)
+                            'people_fully_vaccinated_per_hundred', None
+                        )
                         new_vaccinations_smoothed_per_million = row.get(
                             'new_vaccinations_smoothed_per_million', None
                         )
