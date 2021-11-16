@@ -3,12 +3,12 @@ export const VACCS_PER_DAY = "vaccs_per_day"
 
 const ENDPOINTS = {
     [CASES_PER_DAY]: {
-        uri: "/cases_per_day",
+        uri: "/cases-per-day",
         method: "GET"
     },
 
     [VACCS_PER_DAY]: {
-        uri: "/vax_per_day",
+        uri: "/vax-per-day",
         method: "GET"
     }
 }

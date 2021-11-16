@@ -75,7 +75,7 @@ class DataBase:
                 }
             }, {
                 '$project': {
-                    'date': '$_id',
+                    'date': {'$dateToString': {'format': '%Y-%m-%d', 'date': '$_id'}},
                     'new_cases': '$new_cases',
                     '_id': 0
                 }
@@ -103,7 +103,7 @@ class DataBase:
                 }
             }, {
                 '$project': {
-                    'date': '$_id',
+                    'date': {'$dateToString': {'format': '%Y-%m-%d', 'date': '$_id'}},
                     'new_vaccinations': '$new_vaccinations',
                     '_id': 0
                 }
@@ -268,7 +268,7 @@ class DataBase:
                 }
             }, {
                 '$project': {
-                    'date': '$_id',
+                    'date': {'$dateToString': {'format': '%Y-%m-%d', 'date': '$_id'}},
                     'sum_disease_new_cases': '$sum_disease_new_cases',
                     '_id': 0
                 }
