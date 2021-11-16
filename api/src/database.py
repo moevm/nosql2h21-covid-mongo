@@ -4,6 +4,7 @@ database helper
 """
 
 import json
+import operator
 from datetime import datetime
 from typing import List
 
@@ -55,6 +56,75 @@ class DataBase:
             }
         }
 
+    def get_cases_per_day(
+            self,
+            offset,
+            limit,
+            iso_code,
+            left_bound,
+            right_bound
+    ):
+        first_stage = self.__get_first_stage_of_aggregate([iso_code] if iso_code else None, left_bound, right_bound)
+        result = list(self.__cases.aggregate([
+            first_stage, {
+                '$group': {
+                    '_id': '$date',
+                    'new_cases': {
+                        '$sum': '$new_cases'
+                    }
+                }
+            }, {
+                '$project': {
+                    'date': '$_id',
+                    'new_cases': '$new_cases',
+                    '_id': 0
+                }
+            }
+        ]))
+        result.sort(key=operator.itemgetter('date'))
+        return result[offset:offset + limit]
+
+    def get_vax_per_day(
+            self,
+            offset,
+            limit,
+            iso_code,
+            left_bound,
+            right_bound
+    ):
+        first_stage = self.__get_first_stage_of_aggregate([iso_code] if iso_code else None, left_bound, right_bound)
+        result = list(self.__vaccinations.aggregate([
+            first_stage, {
+                '$group': {
+                    '_id': '$date',
+                    'new_vaccinations': {
+                        '$sum': '$new_vaccinations'
+                    }
+                }
+            }, {
+                '$project': {
+                    'date': '$_id',
+                    'new_vaccinations': '$new_vaccinations',
+                    '_id': 0
+                }
+            }
+        ]))
+        result.sort(key=operator.itemgetter('date'))
+        return result[offset:offset + limit]
+
+    def get_meta_countries(self):
+        return list(self.__countries.find({}, {
+            'iso_code': 1,
+            'location': 1,
+            '_id': 0
+        }))
+
+    def get_country_info(self, iso_code):
+        return self.__countries.find_one(
+            {'iso_code': iso_code},
+            {'_id': 0}
+        )
+
     def get_number_of_new_cases(
             self,
             countries: List[str] = None,
@@ -72,6 +142,10 @@ class DataBase:
         first_stage = self.__get_first_stage_of_aggregate(countries, left_bound, right_bound)
         return list(self.__cases.aggregate([
             first_stage, {
+                '$match': {
+                    'new_cases': {'$gte': 0}
+                }
+            }, {
                 '$group': {
                     '_id': '$iso_code',
                     'max_disease_new_cases': {
@@ -146,6 +220,10 @@ class DataBase:
         first_stage = self.__get_first_stage_of_aggregate(countries, left_bound, right_bound)
         return list(self.__cases.aggregate([
             first_stage, {
+                '$match': {
+                    'new_cases': {'$gte': 0}
+                }
+            }, {
                 '$group': {
                     '_id': '$iso_code',
                     'total_cases': {
@@ -178,6 +256,10 @@ class DataBase:
         first_stage = self.__get_first_stage_of_aggregate(countries, left_bound, right_bound)
         return list(self.__cases.aggregate([
             first_stage, {
+                '$match': {
+                    'new_cases': {'$gte': 0}
+                }
+            }, {
                 '$group': {
                     '_id': '$date',
                     'sum_disease_new_cases': {
@@ -209,6 +291,10 @@ class DataBase:
         )
         return list(self.__cases.aggregate([
             first_stage, {
+                '$match': {
+                    'new_cases': {'$gte': 0}
+                }
+            }, {
                 '$group': {
                     '_id': '$iso_code',
                     'total_cases': {
@@ -339,9 +425,11 @@ class DataBase:
                             'total_vaccinations_per_hundred', None
                         )
                         people_vaccinated_per_hundred = row.get(
-                            'people_vaccinated_per_hundred', None)
+                            'people_vaccinated_per_hundred', None
+                        )
                         people_fully_vaccinated_per_hundred = row.get(
-                            'people_fully_vaccinated_per_hundred', None)
+                            'people_fully_vaccinated_per_hundred', None
+                        )
                         new_vaccinations_smoothed_per_million = row.get(
                             'new_vaccinations_smoothed_per_million', None
                         )
