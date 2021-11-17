@@ -27,21 +27,15 @@ def home_page():
     })
 
 
-# getting info from db
-# need use filters like left/right bound and countries
-
-# params : left / right bound, iso_code, offset limit
 def get_query_params():
-    offset = int(request.args.get('offset', 0))
-    limit = int(request.args.get('limit', 10))
     iso_code = request.args.get('iso_code', None)
-    left_bound = request.args.get('left_bound', None)
-    right_bound = request.args.get('right_bound', None)
-    if left_bound:
-        left_bound = datetime.datetime.strptime(left_bound, '%Y-%m-%d')
-    if right_bound:
-        right_bound = datetime.datetime.strptime(right_bound, '%Y-%m-%d')
-    return offset, limit, iso_code, left_bound, right_bound
+    date_from = request.args.get('date_from', None)
+    date_to = request.args.get('date_to', None)
+    if date_from:
+        date_from = datetime.datetime.strptime(date_from, '%Y-%m-%d')
+    if date_to:
+        date_to = datetime.datetime.strptime(date_to, '%Y-%m-%d')
+    return iso_code, date_from, date_to
 
 
 @app.route('/country', endpoint='country')
@@ -65,13 +59,21 @@ def get_meta_countries():
 @app.route('/cases-per-day', endpoint='cases-per-day')
 @cross_origin()
 def get_cases_per_day():
-    return {'data': db.get_cases_per_day(*get_query_params())}
+    iso_code, date_from, date_to = get_query_params()
+    country = db.get_country_info(iso_code)
+    if iso_code is not None and country is None:
+        return 'ISO code not found', 404
+    return {'data': db.get_cases_per_day(iso_code, date_from, date_to)}
 
 
 @app.route('/vax-per-day', endpoint='vax-per-day')
 @cross_origin()
 def get_vax_per_day():
-    return {'data': db.get_vax_per_day(*get_query_params())}
+    iso_code, date_from, date_to = get_query_params()
+    country = db.get_country_info(iso_code)
+    if iso_code is not None and country is None:
+        return 'ISO code not found', 404
+    return {'data': db.get_vax_per_day(iso_code, date_from, date_to)}
 
 
 @app.route('/graph-of-dependence', endpoint='graph-of-dependence')

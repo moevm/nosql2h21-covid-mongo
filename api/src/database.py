@@ -31,14 +31,14 @@ class DataBase:
     @staticmethod
     def __get_first_stage_of_aggregate(
             countries: List[str] = None,
-            left_bound: datetime = None,
-            right_bound: datetime = None
+            date_from: datetime = None,
+            date_to: datetime = None
     ):
         date_bounds = {}
-        if left_bound:
-            date_bounds['$gte'] = left_bound
-        if right_bound:
-            date_bounds['$lte'] = right_bound
+        if date_from:
+            date_bounds['$gte'] = date_from
+        if date_to:
+            date_bounds['$lte'] = date_to
         dates = {}
         if date_bounds:
             dates['date'] = date_bounds
@@ -58,59 +58,55 @@ class DataBase:
 
     def get_cases_per_day(
             self,
-            offset,
-            limit,
             iso_code,
-            left_bound,
-            right_bound
+            date_from,
+            date_to
     ):
-        first_stage = self.__get_first_stage_of_aggregate([iso_code] if iso_code else None, left_bound, right_bound)
+        first_stage = self.__get_first_stage_of_aggregate([iso_code] if iso_code else None, date_from, date_to)
         result = list(self.__cases.aggregate([
             first_stage, {
                 '$group': {
                     '_id': '$date',
-                    'new_cases': {
-                        '$sum': '$new_cases'
-                    }
+                    'new_cases': {'$sum': '$new_cases'},
+                    'new_cases_smoothed': {'$sum': '$new_cases_smoothed'}
                 }
             }, {
                 '$project': {
                     'date': {'$dateToString': {'format': '%Y-%m-%d', 'date': '$_id'}},
                     'new_cases': '$new_cases',
+                    'new_cases_smoothed': '$new_cases_smoothed',
                     '_id': 0
                 }
             }
         ]))
         result.sort(key=operator.itemgetter('date'))
-        return result[offset:offset + limit]
+        return result
 
     def get_vax_per_day(
             self,
-            offset,
-            limit,
             iso_code,
-            left_bound,
-            right_bound
+            date_from,
+            date_to
     ):
-        first_stage = self.__get_first_stage_of_aggregate([iso_code] if iso_code else None, left_bound, right_bound)
+        first_stage = self.__get_first_stage_of_aggregate([iso_code] if iso_code else None, date_from, date_to)
         result = list(self.__vaccinations.aggregate([
             first_stage, {
                 '$group': {
                     '_id': '$date',
-                    'new_vaccinations': {
-                        '$sum': '$new_vaccinations'
-                    }
+                    'new_vaccinations': {'$sum': '$new_vaccinations'},
+                    'new_vaccinations_smoothed': {'$sum': '$new_vaccinations_smoothed'}
                 }
             }, {
                 '$project': {
                     'date': {'$dateToString': {'format': '%Y-%m-%d', 'date': '$_id'}},
                     'new_vaccinations': '$new_vaccinations',
+                    'new_vaccinations_smoothed': '$new_vaccinations_smoothed',
                     '_id': 0
                 }
             }
         ]))
         result.sort(key=operator.itemgetter('date'))
-        return result[offset:offset + limit]
+        return result
 
     def get_meta_countries(self):
         return list(self.__countries.find({}, {
@@ -128,18 +124,18 @@ class DataBase:
     def get_number_of_new_cases(
             self,
             countries: List[str] = None,
-            left_bound: datetime = None,
-            right_bound: datetime = None
+            date_from: datetime = None,
+            date_to: datetime = None
     ):
         """
         минимальное/среднее/максимальное количество новых заболевших
         в сутки за весь/заданный период пандемии
         :param countries:
-        :param left_bound:
-        :param right_bound:
+        :param date_from:
+        :param date_to:
         :return:
         """
-        first_stage = self.__get_first_stage_of_aggregate(countries, left_bound, right_bound)
+        first_stage = self.__get_first_stage_of_aggregate(countries, date_from, date_to)
         return list(self.__cases.aggregate([
             first_stage, {
                 '$match': {
@@ -172,18 +168,18 @@ class DataBase:
     def get_max_number_of_new_vaccinated(
             self,
             countries: List[str] = None,
-            left_bound: datetime = None,
-            right_bound: datetime = None
+            date_from: datetime = None,
+            date_to: datetime = None
     ):
         """
         максимальное количество новых вакцинированных
         в сутки за весь/заданный период вакцинации
         :param countries:
-        :param left_bound:
-        :param right_bound:
+        :param date_from:
+        :param date_to:
         :return:
         """
-        first_stage = self.__get_first_stage_of_aggregate(countries, left_bound, right_bound)
+        first_stage = self.__get_first_stage_of_aggregate(countries, date_from, date_to)
         return list(
             self.__vaccinations.aggregate([
                 first_stage, {
@@ -206,18 +202,18 @@ class DataBase:
     def get_total_number_of_cases(
             self,
             countries: List[str] = None,
-            left_bound: datetime = None,
-            right_bound: datetime = None
+            date_from: datetime = None,
+            date_to: datetime = None
     ):
         """
         общее количество заболевших по миру/стране
         за весь/заданный период пандемии
         :param countries:
-        :param left_bound:
-        :param right_bound:
+        :param date_from:
+        :param date_to:
         :return:
         """
-        first_stage = self.__get_first_stage_of_aggregate(countries, left_bound, right_bound)
+        first_stage = self.__get_first_stage_of_aggregate(countries, date_from, date_to)
         return list(self.__cases.aggregate([
             first_stage, {
                 '$match': {
@@ -242,18 +238,18 @@ class DataBase:
     def get_diagrams_of_total_number_of_new_cases(
             self,
             countries: List[str] = None,
-            left_bound: datetime = None,
-            right_bound: datetime = None
+            date_from: datetime = None,
+            date_to: datetime = None
     ):
         """
         диаграммы общего количества новых заболевших
         в сутки за определённый период пандемии
         :param countries:
-        :param left_bound:
-        :param right_bound:
+        :param date_from:
+        :param date_to:
         :return:
         """
-        first_stage = self.__get_first_stage_of_aggregate(countries, left_bound, right_bound)
+        first_stage = self.__get_first_stage_of_aggregate(countries, date_from, date_to)
         return list(self.__cases.aggregate([
             first_stage, {
                 '$match': {
@@ -277,17 +273,17 @@ class DataBase:
 
     def get_graph_of_dependence_of_cases(
             self,
-            left_bound: datetime = None,
-            right_bound: datetime = None
+            date_from: datetime = None,
+            date_to: datetime = None
     ):
         """
         график зависимости заболевших в стране от плотности населения
-        :param left_bound:
-        :param right_bound:
+        :param date_from:
+        :param date_to:
         :return:
         """
         first_stage = self.__get_first_stage_of_aggregate(
-            left_bound=left_bound, right_bound=right_bound
+            date_from=date_from, date_to=date_to
         )
         return list(self.__cases.aggregate([
             first_stage, {
