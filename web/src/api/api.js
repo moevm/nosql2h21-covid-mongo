@@ -20,7 +20,10 @@ class api {
 
     async fetch(endpoint, data) {
         const response = await this.generateRequest(endpoint, data);
-        return response.json();
+        if (!response.ok) {
+            throw new Error(`${response.status}: ${response.statusText}`)
+        }
+        return response.json()
     }
 }
 

@@ -1,9 +1,11 @@
 import React from 'react'
 
-export default function Chart() {
+const VaccsChart = () => {
     return (
         <div>
-            Chart
+            "VACCS"
         </div>
     )
 }
+
+export default VaccsChart
