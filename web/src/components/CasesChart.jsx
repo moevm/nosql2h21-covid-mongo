@@ -10,14 +10,16 @@ import { useEffect } from 'react';
 import useFetch from 'hooks/useFetch';
 import { CASES_PER_DAY } from 'api/endpoints';
 
+function int(value) {
+  return ~~value
+}
+
 const CasesChart = () => {
   const [cases, performCasesFetch] = useFetch(CASES_PER_DAY)
 
   useEffect(() => {
     performCasesFetch()
   }, [performCasesFetch])
-
-  console.log(cases);
 
   const loading = () => (
     <Box sx={{display: "flex", width: "100%", height: "100%", justifyContent: "center", alignItems: "center"}}>
@@ -50,7 +52,7 @@ const CasesChart = () => {
             order: 1
           },{
             label: "7-day avg",
-            data: data.map(item => ({x: item.date, y: ~~item.new_cases_smoothed})),
+            data: data.map(item => ({x: item.date, y: int(item.new_cases_smoothed)})),
             borderColor: "green",
             pointRadius: 0,
             hoverBackgroundColor: "green",
