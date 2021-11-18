@@ -5,7 +5,7 @@ import Typography from '@mui/material/Typography';
 
 import Stats from 'components/Stats';
 
-const app_title = "Статиcтика COVID-19";
+const app_title = "Статистика COVID-19";
 
 function App() {
   return (

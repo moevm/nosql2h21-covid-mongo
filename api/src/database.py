@@ -94,13 +94,17 @@ class DataBase:
                 '$group': {
                     '_id': '$date',
                     'new_vaccinations': {'$sum': '$new_vaccinations'},
-                    'new_vaccinations_smoothed': {'$sum': '$new_vaccinations_smoothed'}
+                    'new_vaccinations_smoothed': {'$sum': '$new_vaccinations_smoothed'},
+                    'people_vaccinated': {'$sum': '$people_vaccinated'},
+                    'people_fully_vaccinated': {'$sum': '$people_fully_vaccinated'},
                 }
             }, {
                 '$project': {
                     'date': {'$dateToString': {'format': '%Y-%m-%d', 'date': '$_id'}},
                     'new_vaccinations': '$new_vaccinations',
                     'new_vaccinations_smoothed': '$new_vaccinations_smoothed',
+                    'people_vaccinated': '$people_vaccinated',
+                    'people_fully_vaccinated': '$people_fully_vaccinated',
                     '_id': 0
                 }
             }

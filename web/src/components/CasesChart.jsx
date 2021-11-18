@@ -1,25 +1,28 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import CircularProgress from '@mui/material/CircularProgress'
 import SentimentVeryDissatisfiedIcon from '@mui/icons-material/SentimentVeryDissatisfied';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography'
-import { Line } from 'react-chartjs-2';
+import {Line} from 'react-chartjs-2';
 
-import { useEffect } from 'react';
 
 import useFetch from 'hooks/useFetch';
-import { CASES_PER_DAY } from 'api/endpoints';
+import {CASES_PER_DAY} from 'api/endpoints';
 
 function int(value) {
   return ~~value
 }
 
-const CasesChart = () => {
+const CasesChart = ({isoCode = null}) => {
   const [cases, performCasesFetch] = useFetch(CASES_PER_DAY)
 
   useEffect(() => {
-    performCasesFetch()
-  }, [performCasesFetch])
+    if (isoCode) {
+      performCasesFetch({iso_code: isoCode})
+    } else {
+      performCasesFetch()
+    }
+  }, [performCasesFetch, isoCode])
 
   const loading = () => (
     <Box sx={{display: "flex", width: "100%", height: "100%", justifyContent: "center", alignItems: "center"}}>
@@ -28,14 +31,20 @@ const CasesChart = () => {
   )
 
   const error = (message) => (
-    <Box sx={{display: "flex", width: "100%", height: "100%", flexDirection: "column", justifyContent: "center", alignItems: "center"}}>
+    <Box sx={{
+      display: "flex",
+      width: "100%",
+      height: "100%",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center"
+    }}>
       <SentimentVeryDissatisfiedIcon color="primary" style={{width: "10rem", height: "10rem"}}/>
       <Typography variant="h6">{message}</Typography>
     </Box>
   )
 
-  const chart = (response) => 
-  {
+  const chart = (response) => {
     const data = response.data;
     return (
       <Line
@@ -50,7 +59,7 @@ const CasesChart = () => {
             hoverRadius: 0,
             showLine: true,
             order: 1
-          },{
+          }, {
             label: "7-day avg",
             data: data.map(item => ({x: item.date, y: int(item.new_cases_smoothed)})),
             borderColor: "green",
@@ -84,7 +93,9 @@ const CasesChart = () => {
             tooltip: {
               displayColors: false,
               callbacks: {
-                afterTitle: (items) => {items.reverse()}
+                afterTitle: (items) => {
+                  items.reverse()
+                }
               }
             },
           }
@@ -98,7 +109,7 @@ const CasesChart = () => {
                 e.x >= chartArea.left &&
                 e.y >= chartArea.top &&
                 e.x <= chartArea.right &&
-                e.y <= chartArea.bottom && 
+                e.y <= chartArea.bottom &&
                 chart._active.length
               ) {
                 chart.options.mouseLine.x = chart._active[0].element.x;
@@ -110,7 +121,7 @@ const CasesChart = () => {
               var ctx = chart.ctx;
               var chartArea = chart.chartArea;
               var x = chart.options.mouseLine.x;
-      
+
               if (!isNaN(x)) {
                 ctx.save();
                 ctx.strokeStyle = chart.options.mouseLine.color;
