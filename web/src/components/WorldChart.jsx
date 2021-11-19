@@ -53,7 +53,8 @@ const chartOptions = {
         afterTitle: (items) => {items.reverse()}
       }
     },
-  }
+  },
+  events: ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove', 'mouseup', 'mousedown'],
 }
 
 const verticalLinePlugin = {
@@ -96,6 +97,26 @@ const verticalLinePlugin = {
   }
 }
 
+let dateFrom = null
+
+const chooseCustomPeriod = (setDates) => {
+  return {
+    afterEvent: (chart, {event: e}) => {
+      switch (e.type) {
+        case 'mousedown':
+          dateFrom = e.chart.tooltip.title[0]
+          break;
+        case 'mouseup':
+          setDates({
+            'dateTo': e.chart.tooltip.title[0],
+            'dateFrom': dateFrom
+          })
+          break;
+      }
+    }
+  }
+}
+
 const tooltipPlugin = Chart.registry.getPlugin('tooltip');
 tooltipPlugin.positioners.custom = function(items) {
   if (items.length) {
@@ -109,7 +130,12 @@ tooltipPlugin.positioners.custom = function(items) {
 
 const int = value => ~~value
 
-const WorldChart = ({data, label="data", smoothedLabel="smoothed data", primaryColor="#737373", secondaryColor="#4d4d4d"}) => {
+const WorldChart = (
+  {
+    data, label="data", smoothedLabel="smoothed data",
+    primaryColor="#737373", secondaryColor="#4d4d4d",
+    setDates
+  }) => {
   primaryColor = chroma(primaryColor)
   secondaryColor = chroma(secondaryColor)
 
@@ -128,7 +154,7 @@ const WorldChart = ({data, label="data", smoothedLabel="smoothed data", primaryC
         ]
       }}
       options={chartOptions}
-      plugins={[verticalLinePlugin]}
+      plugins={[verticalLinePlugin, chooseCustomPeriod(setDates)]}
       width="100%"
     />
   )

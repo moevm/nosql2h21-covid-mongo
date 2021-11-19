@@ -38,6 +38,8 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Stats() {
   const [currentTab, setCurrentTab] = React.useState(0);
+  const [dates, setDates] = React.useState(null);
+
   const classes = useStyles();
 
   return (
@@ -52,11 +54,11 @@ export default function Stats() {
       <Paper>
         <AspectRatioBox ratio={16/8}>
           <TabPanel value={currentTab} index={0}>
-            <CasesChart />
+            <CasesChart dates={dates} setDates={setDates}/>
           </TabPanel>
 
           <TabPanel value={currentTab} index={1}>
-            <VaccsChart />
+            <VaccsChart dates={dates} setDates={setDates}/>
           </TabPanel>
         </AspectRatioBox>
       </Paper>

@@ -11,12 +11,31 @@ import { CASES_PER_DAY } from 'api/endpoints';
 
 import WorldChart from 'components/WorldChart';
 
-const CasesChart = () => {
+const CasesChart = ({dates = null, setDates = null}) => {
   const [cases, performCasesFetch] = useFetch(CASES_PER_DAY)
 
   useEffect(() => {
-    performCasesFetch()
-  }, [performCasesFetch])
+    if (dates) {
+      let dateFrom = dates.dateFrom
+      let dateTo = dates.dateTo
+      console.log(dateFrom, dateTo)
+      if (dateFrom) {
+        if (dateTo) {
+          performCasesFetch({'date_from': dateFrom, 'date_to': dateTo})
+        } else {
+          performCasesFetch({'date_from': dateFrom})
+        }
+      } else {
+        if (dateTo) {
+          performCasesFetch({'date_to': dateTo})
+        } else {
+          performCasesFetch()
+        }
+      }
+    } else {
+      performCasesFetch()
+    }
+  }, [performCasesFetch, dates])
 
   const loading = () => (
     <Box sx={{display: "flex", width: "100%", height: "100%", justifyContent: "center", alignItems: "center"}}>
@@ -39,7 +58,8 @@ const CasesChart = () => {
       value_smoothed: item.new_cases_smoothed
     }));
     return (
-      <WorldChart data={data} label="New cases" smoothedLabel="7-day avg" primaryColor="#174ea6" secondaryColor="#8ab4f8"/>
+      <WorldChart data={data} label="New cases" smoothedLabel="7-day avg" primaryColor="#174ea6" secondaryColor="#8ab4f8"
+                  setDates={setDates}/>
     )
   }
 

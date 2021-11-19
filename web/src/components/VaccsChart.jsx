@@ -12,12 +12,31 @@ import { VACCS_PER_DAY } from 'api/endpoints';
 import WorldChart from 'components/WorldChart';
 
 
-const VaccsChart = () => {
+const VaccsChart = ({dates = null, setDates = null}) => {
   const [vaccs, performVaccsFetch] = useFetch(VACCS_PER_DAY)
 
   useEffect(() => {
-    performVaccsFetch()
-  }, [performVaccsFetch])
+    if (dates) {
+      let dateFrom = dates.dateFrom
+      let dateTo = dates.dateTo
+      console.log(dateFrom, dateTo)
+      if (dateFrom) {
+        if (dateTo) {
+          performVaccsFetch({'date_from': dateFrom, 'date_to': dateTo})
+        } else {
+          performVaccsFetch({'date_from': dateFrom})
+        }
+      } else {
+        if (dateTo) {
+          performVaccsFetch({'date_to': dateTo})
+        } else {
+          performVaccsFetch()
+        }
+      }
+    } else {
+      performVaccsFetch()
+    }
+  }, [performVaccsFetch, dates])
 
   const loading = () => (
     <Box sx={{display: "flex", width: "100%", height: "100%", justifyContent: "center", alignItems: "center"}}>
@@ -40,7 +59,8 @@ const VaccsChart = () => {
       value_smoothed: item.new_vaccinations_smoothed
     }));
     return (
-      <WorldChart data={data} label="New vaccinated" smoothedLabel="7-day avg" primaryColor="#137333" secondaryColor="#5bb974"/>
+      <WorldChart data={data} label="New vaccinated" smoothedLabel="7-day avg" primaryColor="#137333" secondaryColor="#5bb974"
+                  setDates={setDates}/>
     )
   }
 

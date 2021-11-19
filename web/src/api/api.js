@@ -9,12 +9,13 @@ class api {
 
     async generateRequest(endpoint, data) {
         const {method, uri} = this.endpoints[endpoint];
-        const URL = `${this.baseUrl}${uri}`;
-        
+        let url = new URL(`${this.baseUrl}${uri}`);
+
         if (["GET"].includes(method)) {
-            return fetch(URL, {method, params: data});
+            url.search = new URLSearchParams(data).toString();
+            return fetch(url, {method});
         } else {
-            return fetch(URL, {method, body: data});
+            return fetch(url, {method, body: data});
         }
     }
 
