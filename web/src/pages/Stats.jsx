@@ -4,7 +4,6 @@ import Box from '@mui/material/Box'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
 import Paper from '@mui/material/Paper'
-
 import { makeStyles } from '@material-ui/core/styles'
 
 import AspectRatioBox from 'components/AspectRatioBox'
@@ -34,11 +33,6 @@ const useStyles = makeStyles((theme) => ({
   },
   chartType: {
     margin: theme.spacing(1, 0)
-  },
-  button: {
-    border: "1px solid",
-    borderColor: theme.palette.primary.main,
-    margin: theme.spacing(0, 1)
   },
 }))
 

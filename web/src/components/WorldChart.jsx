@@ -2,14 +2,15 @@ import React from 'react'
 import { Chart } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 
-import Color from 'color';
+import chroma from 'chroma-js';
 
 const setupDataset = (data, label, color) => ({
   label,
   data,
-  borderColor: color.toString(),
+  borderColor: color.hex(),
+  borderWidth: 1,
   fill: "origin",
-  backgroundColor: color.fade(0.2).toString(),
+  backgroundColor: color.alpha(0.8).hex(),
   pointRadius: 0,
   hoverRadius: 0,
   showLine: true,
@@ -18,9 +19,9 @@ const setupDataset = (data, label, color) => ({
 const setupSmoothedDataset = (data, label, color) => ({
   label,
   data,
-  borderColor: color.toString(),
+  borderColor: color.hex(),
   pointRadius: 0,
-  hoverBackgroundColor: color.toString(),
+  hoverBackgroundColor: color.hex(),
   showLine: true,
 })
 
@@ -109,8 +110,8 @@ tooltipPlugin.positioners.custom = function(items) {
 const int = value => ~~value
 
 const WorldChart = ({data, label="data", smoothedLabel="smoothed data", primaryColor="#737373", secondaryColor="#4d4d4d"}) => {
-  primaryColor = Color(primaryColor)
-  secondaryColor = Color(secondaryColor)
+  primaryColor = chroma(primaryColor)
+  secondaryColor = chroma(secondaryColor)
 
   return (
       <Line
