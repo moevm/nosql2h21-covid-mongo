@@ -9,5 +9,5 @@ ENV CHOKIDAR_USEPOLLING=true
 ENV NODE_OPTIONS=--openssl-legacy-provider
 RUN npm run build
 
-FROM nginx
+FROM nginx as nginx
 COPY --from=build /app/build /usr/share/nginx/html
