@@ -16,3 +16,4 @@ IF %build%==1 (
 )
 
 docker image prune -f
+docker volume prune -f

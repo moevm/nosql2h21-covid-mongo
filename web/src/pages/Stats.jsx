@@ -39,11 +39,6 @@ const useStyles = makeStyles((theme) => ({
   chartType: {
     margin: theme.spacing(1, 0)
   },
-  button: {
-    border: "1px solid",
-    borderColor: theme.palette.primary.main,
-    margin: theme.spacing(0, 1)
-  },
 }))
 
 export default function Stats() {
