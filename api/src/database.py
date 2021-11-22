@@ -352,7 +352,7 @@ class DataBase:
     def __add_vaccinations(self, vaccinations):
         return self.__vaccinations.insert_many(vaccinations)
 
-    def parse_data(self):
+    def parse_data(self, data):
         def is_dict_null(d):
             dict_is_null = True
             for dict_value in d.values():
@@ -365,8 +365,6 @@ class DataBase:
             return number
 
         self.__clear_db()
-        with open('owid-covid-data.json', encoding='utf-8') as file:
-            data = json.load(file)
         countries = []
         cases = []
         vaccinations = []
