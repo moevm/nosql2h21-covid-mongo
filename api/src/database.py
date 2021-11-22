@@ -374,6 +374,8 @@ class DataBase:
         cases = []
         vaccinations = []
         for iso_code, value in data.items():
+            if iso_code.startswith('OWID'):
+                continue
             country = dict(
                 iso_code=iso_code,
                 continent=value.get('continent', None),
