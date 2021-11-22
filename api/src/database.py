@@ -56,6 +56,15 @@ class DataBase:
             }
         }
 
+    def get_countries(self):
+        return list(self.__countries.find({}, {'_id': 0}))
+
+    def get_cases(self):
+        return list(self.__cases.find({}, {'_id': 0}))
+
+    def get_vaccinations(self):
+        return list(self.__vaccinations.find({}, {'_id': 0}))
+
     def get_cases_per_day(
             self,
             iso_code,
@@ -347,10 +356,7 @@ class DataBase:
     def __add_vaccinations(self, vaccinations):
         return self.__vaccinations.insert_many(vaccinations)
 
-    def parse_data(self):
-        if __name__ != '__main__':
-            raise Exception("Do not call this function outside database.py")
-
+    def parse_data(self, data):
         def is_dict_null(d):
             dict_is_null = True
             for dict_value in d.values():
@@ -363,12 +369,12 @@ class DataBase:
             return number
 
         self.__clear_db()
-        with open('owid-covid-data.json', encoding='utf-8') as file:
-            data = json.load(file)
         countries = []
         cases = []
         vaccinations = []
         for iso_code, value in data.items():
+            if iso_code.startswith('OWID'):
+                continue
             country = dict(
                 iso_code=iso_code,
                 continent=value.get('continent', None),
@@ -453,6 +459,56 @@ class DataBase:
         self.__add_cases(cases)
         self.__add_vaccinations(vaccinations)
 
+    def dump_data(self):
+        countries = {}
+        for country in self.get_countries():
+            countries[country.get('iso_code')] = dict(
+                continent=country.get('continent', None),
+                location=country.get('location', None),
+                population=country.get('population', None),
+                population_density=country.get('population_density', None),
+                median_age=country.get('median_age', None),
+                aged_65_older=country.get('aged_65_older', None),
+                aged_70_older=country.get('aged_70_older', None),
+                dict_data={}
+            )
+
+        for case in self.get_cases():
+            iso_code = case.get('iso_code')
+            date = case.get('date').strftime('%Y-%m-%d')
+            countries[iso_code]['dict_data'][date] = dict(
+                total_cases=case.get('total_cases'),
+                new_cases=case.get('new_cases'),
+                new_cases_smoothed=case.get('new_cases_smoothed'),
+                total_cases_per_million=case.get('total_cases_per_million'),
+                new_cases_per_million=case.get('new_cases_per_million'),
+                new_cases_smoothed_per_million=case.get('new_cases_smoothed_per_million')
+            )
+
+        for vaccination in self.get_vaccinations():
+            iso_code = vaccination.get('iso_code')
+            date = vaccination.get('date').strftime('%Y-%m-%d')
+            countries[iso_code]['dict_data'][date].update(
+                dict(
+                    people_vaccinated=vaccination.get('people_vaccinated'),
+                    people_fully_vaccinated=vaccination.get('people_fully_vaccinated'),
+                    new_vaccinations=vaccination.get('new_vaccinations'),
+                    new_vaccinations_smoothed=vaccination.get('new_vaccinations_smoothed'),
+                    total_vaccinations_per_hundred=vaccination.get('total_vaccinations_per_hundred'),
+                    people_vaccinated_per_hundred=vaccination.get('people_vaccinated_per_hundred'),
+                    people_fully_vaccinated_per_hundred=vaccination.get('people_fully_vaccinated_per_hundred'),
+                    new_vaccinations_smoothed_per_million=vaccination.get('new_vaccinations_smoothed_per_million')
+                )
+            )
+        for iso_code, country in countries.items():
+            dict_data = country['dict_data']
+            replaced_data = []
+            for date, value in dict_data.items():
+                replaced_data.append({**{'date': date}, **value})
+            country['data'] = replaced_data
+            country.pop('dict_data', None)
+        return countries
+
 
 def main():
     """
@@ -460,7 +516,9 @@ def main():
     :return:
     """
     database = DataBase('username', 'password')
-    database.parse_data()
+    with open('owid-covid-data.json', encoding='utf-8') as file:
+        data = json.load(file)
+    database.parse_data(data)
 
 
 if __name__ == '__main__':

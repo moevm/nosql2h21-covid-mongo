@@ -3,8 +3,10 @@ docstring
 main app
 """
 import datetime
+import json
+from json import JSONDecodeError
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_file
 from flask_cors import CORS, cross_origin
 
 import settings
@@ -38,6 +40,26 @@ def get_query_params():
     return iso_code, date_from, date_to
 
 
+@app.route('/import-database', methods=['POST'], endpoint='import-database')
+@cross_origin()
+def import_database():
+    try:
+        data = json.loads(request.data.decode('utf-8'))
+        db.parse_data(data)
+        return 'Success', 200
+    except JSONDecodeError as err:
+        return f'JSONDecodeError | {err}', 500
+
+
+@app.route('/export-database', endpoint='export-database')
+@cross_origin()
+def export_database():
+    data = db.dump_data()
+    with open('data.json', 'w', encoding='utf-8') as fp:
+        json.dump(data, fp, indent=2)
+    return send_file('../data.json', as_attachment=True)
+
+
 @app.route('/country', endpoint='country')
 @cross_origin()
 def get_country():
@@ -48,6 +70,24 @@ def get_country():
     if country is None:
         return 'ISO code not found', 404
     return {'data': country}
+
+
+@app.route('/data-countries', endpoint='data-countries')
+@cross_origin()
+def get_countries_countries():
+    return {'data': db.get_countries()}
+
+
+@app.route('/data-cases', endpoint='data-cases')
+@cross_origin()
+def get_countries_countries():
+    return {'data': db.get_cases()}
+
+
+@app.route('/data-vaccinations', endpoint='data-vaccinations')
+@cross_origin()
+def get_countries_countries():
+    return {'data': db.get_vaccinations()}
 
 
 @app.route('/country-list', endpoint='country-list')
