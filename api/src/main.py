@@ -50,24 +50,6 @@ def get_country():
     return {'data': country}
 
 
-@app.route('/data-countries', endpoint='data-countries')
-@cross_origin()
-def get_countries_countries():
-    return {'data': db.get_countries()}
-
-
-@app.route('/data-cases', endpoint='data-cases')
-@cross_origin()
-def get_countries_countries():
-    return {'data': db.get_cases()}
-
-
-@app.route('/data-vaccinations', endpoint='data-vaccinations')
-@cross_origin()
-def get_countries_countries():
-    return {'data': db.get_vaccinations()}
-
-
 @app.route('/country-list', endpoint='country-list')
 @cross_origin()
 def get_meta_countries():
