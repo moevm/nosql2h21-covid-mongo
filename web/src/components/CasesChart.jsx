@@ -3,23 +3,23 @@ import CircularProgress from '@mui/material/CircularProgress'
 import SentimentVeryDissatisfiedIcon from '@mui/icons-material/SentimentVeryDissatisfied';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography'
-
+import { formatISO } from 'date-fns';
 
 import useFetch from 'hooks/useFetch';
 import {CASES_PER_DAY} from 'api/endpoints';
 
 import WorldChart from 'components/WorldChart';
 
-const CasesChart = ({isoCode = null}) => {
+const CasesChart = ({isoCode = null, dateFrom = null, dateTo = null}) => {
   const [cases, performCasesFetch] = useFetch(CASES_PER_DAY)
 
   useEffect(() => {
-    if (isoCode) {
-      performCasesFetch({iso_code: isoCode})
-    } else {
-      performCasesFetch()
-    }
-  }, [performCasesFetch, isoCode])
+      performCasesFetch({
+        iso_code: isoCode,
+        date_from: dateFrom && formatISO(dateFrom, {representation: "date"}),
+        date_to: dateTo && formatISO(dateTo, {representation: "date"})
+      })
+  }, [performCasesFetch, isoCode, dateFrom, dateTo])
 
   const loading = () => (
     <Box sx={{display: "flex", width: "100%", height: "100%", justifyContent: "center", alignItems: "center"}}>
