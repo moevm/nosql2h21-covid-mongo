@@ -19,7 +19,7 @@ import DensityStats from 'pages/DensityStats';
 import Data from 'pages/Data';
 import NotFound from 'pages/NotFound';
 
-const app_title = "Статиcтика COVID-19";
+const app_title = "Статистика COVID-19";
 
 const ListItemWithIcon = ({icon, text, link, ...other}) => {
   const IconComponent = icon
@@ -41,16 +41,20 @@ const pages = {
 }
 
 function App() {
-  const [currentPage, setCurrentPage] = React.useState(0);
+  const initialPage = Object.values(pages).find(page => page.link === window.location.pathname)
+  
+  const [currentPage, setCurrentPage] = React.useState(initialPage?.title);
+
+  console.log(currentPage)
 
   return (
     <>
-      <Header title={app_title}>
+      <Header title={app_title} subtitle={currentPage}>
         <List>
-          <ListItemWithIcon icon={ShowChartIcon}         text={pages.stats.title}        link={pages.stats.link}/>
-          <ListItemWithIcon icon={StackedLineChartIcon}  text={pages.statsCompare.title} link={pages.statsCompare.link}/>
-          <ListItemWithIcon icon={QueryStatsRoundedIcon} text={pages.densityStats.title} link={pages.densityStats.link}/>
-          <ListItemWithIcon icon={StorageIcon}           text={pages.data.title}         link={pages.data.link}/>
+          <ListItemWithIcon icon={ShowChartIcon}         onClick={() => {setCurrentPage(pages.stats.title)}}        text={pages.stats.title}        link={pages.stats.link}/>
+          <ListItemWithIcon icon={StackedLineChartIcon}  onClick={() => {setCurrentPage(pages.statsCompare.title)}} text={pages.statsCompare.title} link={pages.statsCompare.link}/>
+          <ListItemWithIcon icon={QueryStatsRoundedIcon} onClick={() => {setCurrentPage(pages.densityStats.title)}} text={pages.densityStats.title} link={pages.densityStats.link}/>
+          <ListItemWithIcon icon={StorageIcon}           onClick={() => {setCurrentPage(pages.data.title)}}         text={pages.data.title}         link={pages.data.link}/>
         </List>
       </Header>
       <Container maxWidth="lg">

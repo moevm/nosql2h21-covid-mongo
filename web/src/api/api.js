@@ -7,14 +7,17 @@ class api {
         this.endpoints = endpoints;
     }
 
-    async generateRequest(endpoint, data) {
+    async generateRequest(endpoint, data = {}) {
         const {method, uri} = this.endpoints[endpoint];
-        const URL = `${this.baseUrl}${uri}`;
+        let url = new URL(`${this.baseUrl}${uri}`);
         
+        const dataWithoutBlanks = Object.fromEntries(Object.entries(data).filter(([_, v]) => v != null));
+
         if (["GET"].includes(method)) {
-            return fetch(URL, {method, params: data});
+            url.search = new URLSearchParams(dataWithoutBlanks).toString();
+            return fetch(url, {method});
         } else {
-            return fetch(URL, {method, body: data});
+            return fetch(url, {method, body: dataWithoutBlanks});
         }
     }
 

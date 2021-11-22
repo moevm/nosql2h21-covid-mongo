@@ -1,22 +1,25 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import CircularProgress from '@mui/material/CircularProgress'
 import SentimentVeryDissatisfiedIcon from '@mui/icons-material/SentimentVeryDissatisfied';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography'
-
-import { useEffect } from 'react';
+import { formatISO } from 'date-fns';
 
 import useFetch from 'hooks/useFetch';
-import { CASES_PER_DAY } from 'api/endpoints';
+import {CASES_PER_DAY} from 'api/endpoints';
 
 import WorldChart from 'components/WorldChart';
 
-const CasesChart = () => {
+const CasesChart = ({isoCode = null, dateFrom = null, dateTo = null}) => {
   const [cases, performCasesFetch] = useFetch(CASES_PER_DAY)
 
   useEffect(() => {
-    performCasesFetch()
-  }, [performCasesFetch])
+      performCasesFetch({
+        iso_code: isoCode,
+        date_from: dateFrom && formatISO(dateFrom, {representation: "date"}),
+        date_to: dateTo && formatISO(dateTo, {representation: "date"})
+      })
+  }, [performCasesFetch, isoCode, dateFrom, dateTo])
 
   const loading = () => (
     <Box sx={{display: "flex", width: "100%", height: "100%", justifyContent: "center", alignItems: "center"}}>
@@ -25,7 +28,14 @@ const CasesChart = () => {
   )
 
   const error = (message) => (
-    <Box sx={{display: "flex", width: "100%", height: "100%", flexDirection: "column", justifyContent: "center", alignItems: "center"}}>
+    <Box sx={{
+      display: "flex",
+      width: "100%",
+      height: "100%",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center"
+    }}>
       <SentimentVeryDissatisfiedIcon color="primary" style={{width: "10rem", height: "10rem"}}/>
       <Typography variant="h6">{message}</Typography>
     </Box>

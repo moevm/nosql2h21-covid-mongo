@@ -2,7 +2,8 @@ import React from 'react'
 import CircularProgress from '@mui/material/CircularProgress'
 import SentimentVeryDissatisfiedIcon from '@mui/icons-material/SentimentVeryDissatisfied';
 import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography'
+import Typography from '@mui/material/Typography';
+import { formatISO } from 'date-fns';
 
 import { useEffect } from 'react';
 
@@ -12,12 +13,16 @@ import { VACCS_PER_DAY } from 'api/endpoints';
 import WorldChart from 'components/WorldChart';
 
 
-const VaccsChart = () => {
+const VaccsChart = ({isoCode = null, dateFrom = null, dateTo = null}) => {
   const [vaccs, performVaccsFetch] = useFetch(VACCS_PER_DAY)
 
   useEffect(() => {
-    performVaccsFetch()
-  }, [performVaccsFetch])
+    performVaccsFetch({
+      iso_code: isoCode,
+      date_from: dateFrom && formatISO(dateFrom, {representation: "date"}),
+      date_to: dateTo && formatISO(dateTo, {representation: "date"})
+    })
+  }, [performVaccsFetch, isoCode, dateFrom, dateTo])
 
   const loading = () => (
     <Box sx={{display: "flex", width: "100%", height: "100%", justifyContent: "center", alignItems: "center"}}>

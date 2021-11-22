@@ -26,7 +26,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const Header = ({title="Title", children}) => {
+const Header = ({title="Title", subtitle=undefined, children}) => {
   const [open, setOpen] = React.useState(false);
   const classes = useStyles();
   const handleOpen = () => {setOpen(true)};
@@ -41,8 +41,10 @@ const Header = ({title="Title", children}) => {
             <Typography variant="h6" component="div" sx={{flexGrow: 1}}>
               {title}
             </Typography>
+            <Typography variant="h6" component="div">
+              {subtitle}
+            </Typography>
           </Container>
-          
           <IconButton color="inherit" aria-label="open menu" onClick={handleOpen} edge="start" sx={{mr: 2}}>
             <MenuIcon fontSize="large"/>
           </IconButton>
