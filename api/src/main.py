@@ -3,6 +3,8 @@ docstring
 main app
 """
 import datetime
+import json
+from json import JSONDecodeError
 
 from flask import Flask, render_template, request
 from flask_cors import CORS, cross_origin
@@ -36,6 +38,17 @@ def get_query_params():
     if date_to:
         date_to = datetime.datetime.strptime(date_to, '%Y-%m-%d')
     return iso_code, date_from, date_to
+
+
+@app.route('/import-database', methods=['POST'], endpoint='import-database')
+@cross_origin()
+def import_database():
+    try:
+        data = json.loads(request.data.decode('utf-8'))
+        db.parse_data(data)
+        return 'Success', 200
+    except JSONDecodeError as err:
+        return f'JSONDecodeError | {err}', 500
 
 
 @app.route('/country', endpoint='country')
