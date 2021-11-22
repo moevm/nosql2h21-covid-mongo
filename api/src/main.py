@@ -6,7 +6,7 @@ import datetime
 import json
 from json import JSONDecodeError
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_file
 from flask_cors import CORS, cross_origin
 
 import settings
@@ -49,6 +49,15 @@ def import_database():
         return 'Success', 200
     except JSONDecodeError as err:
         return f'JSONDecodeError | {err}', 500
+
+
+@app.route('/export-database', endpoint='export-database')
+@cross_origin()
+def export_database():
+    data = db.dump_data()
+    with open('data.json', 'w', encoding='utf-8') as fp:
+        json.dump(data, fp, indent=2)
+    return send_file('../data.json', as_attachment=True)
 
 
 @app.route('/country', endpoint='country')
