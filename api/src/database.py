@@ -56,6 +56,15 @@ class DataBase:
             }
         }
 
+    def get_countries(self):
+        return list(self.__countries.find({}, {'_id': 0}))
+
+    def get_cases(self):
+        return list(self.__cases.find({}, {'_id': 0}))
+
+    def get_vaccinations(self):
+        return list(self.__vaccinations.find({}, {'_id': 0}))
+
     def get_cases_per_day(
             self,
             iso_code,
