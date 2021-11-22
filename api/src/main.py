@@ -38,6 +38,16 @@ def get_query_params():
     return iso_code, date_from, date_to
 
 
+@app.route('/import-database', endpoint='import-database')
+@cross_origin()
+def import_database():
+    secret = request.args.get('secret', None)
+    if secret != settings.MONGODB_PASSWORD:
+        return 'You do not have enough permissions', 403
+    db.parse_data()
+    return 'Success', 200
+
+
 @app.route('/country', endpoint='country')
 @cross_origin()
 def get_country():

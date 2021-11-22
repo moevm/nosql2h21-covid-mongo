@@ -353,9 +353,6 @@ class DataBase:
         return self.__vaccinations.insert_many(vaccinations)
 
     def parse_data(self):
-        if __name__ != '__main__':
-            raise Exception("Do not call this function outside database.py")
-
         def is_dict_null(d):
             dict_is_null = True
             for dict_value in d.values():
