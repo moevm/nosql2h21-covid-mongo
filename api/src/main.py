@@ -40,6 +40,18 @@ def get_query_params():
     return iso_code, date_from, date_to
 
 
+@app.route('/reset-db', methods=['POST'], endpoint='reset-db')
+@cross_origin()
+def reset_db():
+    try:
+        with open('owid-covid-data.json', encoding='utf-8') as file:
+            data = json.load(file)
+        db.parse_data(data)
+        return 'Success', 200
+    except JSONDecodeError as err:
+        return f'JSONDecodeError | {err}', 400
+
+
 @app.route('/import-database', methods=['POST'], endpoint='import-database')
 @cross_origin()
 def import_database():
