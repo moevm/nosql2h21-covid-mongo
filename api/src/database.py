@@ -62,11 +62,15 @@ class DataBase:
             median_age, population, population_density, sort, order_by
     ):
         def parse_range(x: str) -> dict:
-            x = list(map(int, x.split('-')))
-            if len(x) == 2:
-                return {'$gte': x[0], '$lte': x[1]}
+            x = x.split('|')
             if len(x) == 1:
-                return {'$gte': x[0]}
+                return {'$gte': float(x[0])}
+            if len(x) == 2:
+                if x[0] == '':
+                    return {'$lte': float(x[1])}
+                if x[1] == '':
+                    return {'$gte': float(x[0])}
+                return {'$gte': float(x[0]), '$lte': float(x[1])}
             return {}
         d = {}
         if iso_code:
