@@ -506,7 +506,7 @@ class DataBase:
 
     def dump_data(self):
         countries = {}
-        for country in self.get_countries():
+        for country in list(self.__countries.find({})):
             countries[country.get('iso_code')] = dict(
                 continent=country.get('continent', None),
                 location=country.get('location', None),
@@ -518,7 +518,7 @@ class DataBase:
                 dict_data={}
             )
 
-        for case in self.get_cases():
+        for case in list(self.__cases.find({})):
             iso_code = case.get('iso_code')
             date = case.get('date').strftime('%Y-%m-%d')
             countries[iso_code]['dict_data'][date] = dict(
@@ -529,8 +529,7 @@ class DataBase:
                 new_cases_per_million=case.get('new_cases_per_million'),
                 new_cases_smoothed_per_million=case.get('new_cases_smoothed_per_million')
             )
-
-        for vaccination in self.get_vaccinations():
+        for vaccination in list(self.__vaccinations.find({})):
             iso_code = vaccination.get('iso_code')
             date = vaccination.get('date').strftime('%Y-%m-%d')
             countries[iso_code]['dict_data'][date].update(

@@ -44,7 +44,7 @@ def get_query_params():
 @cross_origin()
 def reset_db():
     try:
-        with open('owid-covid-data.json', encoding='utf-8') as file:
+        with open('/app/owid-covid-data.json', encoding='utf-8') as file:
             data = json.load(file)
         db.parse_data(data)
         return 'Success', 200
@@ -67,9 +67,9 @@ def import_database():
 @cross_origin()
 def export_database():
     data = db.dump_data()
-    with open('data.json', 'w', encoding='utf-8') as fp:
+    with open('/tmp/dataset.json', 'w', encoding='utf-8') as fp:
         json.dump(data, fp, indent=2)
-    return send_file('../data.json', as_attachment=True)
+    return send_file('/tmp/dataset.json', as_attachment=True)
 
 
 @app.route('/country', endpoint='country')
