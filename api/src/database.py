@@ -57,51 +57,58 @@ class DataBase:
             }
         }
 
-    def get_countries(
-            self, iso_code, continent, location, age_65_older, age_70_older,
-            median_age, population, population_density, sort, order_by
-    ):
-        def parse_range(x: str) -> dict:
-            x = x.split('|')
-            if len(x) == 1:
+    @staticmethod
+    def parse_range(x: str) -> dict:
+        x = x.split('|')
+        if len(x) == 1:
+            return {'$gte': float(x[0])}
+        if len(x) == 2:
+            if x[0] == '':
+                return {'$lte': float(x[1])}
+            if x[1] == '':
                 return {'$gte': float(x[0])}
-            if len(x) == 2:
-                if x[0] == '':
-                    return {'$lte': float(x[1])}
-                if x[1] == '':
-                    return {'$gte': float(x[0])}
-                return {'$gte': float(x[0]), '$lte': float(x[1])}
-            return {}
-        d = {}
-        if iso_code:
-            d['iso_code'] = iso_code
-        if continent:
-            d['continent'] = continent
-        if location:
-            d['location'] = location
-        if age_65_older:
-            d['age_65_older'] = parse_range(age_65_older)
-        if age_70_older:
-            d['age_70_older'] = parse_range(age_70_older)
-        if median_age:
-            d['median_age'] = parse_range(median_age)
-        if population:
-            d['population'] = parse_range(population)
-        if population_density:
-            d['population_density'] = parse_range(population_density)
-        print(d, flush=True)
-        if sort is None:
-            return list(self.__countries.find(d, {'_id': 0}))
+            return {'$gte': float(x[0]), '$lte': float(x[1])}
+        return {}
+
+    @staticmethod
+    def parse_date(x):
+        x = x.split('|')
+        if len(x) == 1:
+            return {'$gte': datetime.strptime(x[0], '%Y-%m-%d')}
+        if len(x) == 2:
+            if x[0] == '':
+                return {'$lte': datetime.strptime(x[1], '%Y-%m-%d')}
+            if x[1] == '':
+                return {'$gte': datetime.strptime(x[0], '%Y-%m-%d')}
+            return {'$gte': datetime.strptime(x[0], '%Y-%m-%d'),
+                    '$lte': datetime.strptime(x[1], '%Y-%m-%d')}
+        return {}
+
+    def get_collection_by_query(self, collection, query, extra_fields=None):
+        if extra_fields is None:
+            extra_fields = ['iso_code', 'date']
+
+        sort = query.pop('sort')
+        order_by = query.pop('order_by')
+        for key in query.keys():
+            if key in extra_fields:
+                if key == 'date':
+                    query[key] = self.parse_date(query[key])
+            elif query.get(key, None) is not None:
+                query[key] = self.parse_range(query[key])
         if sort == 'asc':
-            return list(self.__countries.find(d, {'_id': 0}).sort(order_by, pymongo.ASCENDING))
+            return list(collection.find(query, {'_id': 0}).sort(order_by, pymongo.ASCENDING))
         if sort == 'desc':
-            return list(self.__countries.find(d, {'_id': 0}).sort(order_by, pymongo.DESCENDING))
+            return list(collection.find(query, {'_id': 0}).sort(order_by, pymongo.DESCENDING))
 
-    def get_cases(self):
-        return list(self.__cases.find({}, {'_id': 0}))
+    def get_countries(self, query):
+        return self.get_collection_by_query(self.__countries, query, ['iso_code', 'location', 'continent'])
 
-    def get_vaccinations(self):
-        return list(self.__vaccinations.find({}, {'_id': 0}))
+    def get_cases(self, query):
+        return self.get_collection_by_query(self.__cases, query)
+
+    def get_vaccinations(self, query):
+        return self.get_collection_by_query(self.__vaccinations, query)
 
     def get_cases_per_day(
             self,

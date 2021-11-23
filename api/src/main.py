@@ -74,33 +74,29 @@ def get_country():
 
 @app.route('/data-countries', endpoint='data-countries')
 @cross_origin()
-def get_countries_countries():
-    iso_code = request.args.get('iso_code', None)
-    location = request.args.get('location', None)
-    continent = request.args.get('continent', None)
-    age_65_older = request.args.get('age_65_older', None)
-    age_70_older = request.args.get('age_70_older', None)
-    median_age = request.args.get('median_age', None)
-    population = request.args.get('population', None)
-    population_density = request.args.get('population_density', None)
-    sort = request.args.get('sort', 'asc')
-    order_by = request.args.get('order_by', 'iso_code')
-    return {'data': db.get_countries(
-        iso_code, continent, location, age_65_older, age_70_older,
-        median_age, population, population_density, sort, order_by
-    )}
+def get_countries():
+    query = request.args.to_dict()
+    query.setdefault('sort', 'asc')
+    query.setdefault('order_by', 'iso_code')
+    return {'data': db.get_countries(query)}
 
 
 @app.route('/data-cases', endpoint='data-cases')
 @cross_origin()
-def get_countries_countries():
-    return {'data': db.get_cases()}
+def get_cases():
+    query = request.args.to_dict()
+    query.setdefault('sort', 'asc')
+    query.setdefault('order_by', 'iso_code')
+    return {'data': db.get_cases(query)}
 
 
 @app.route('/data-vaccinations', endpoint='data-vaccinations')
 @cross_origin()
-def get_countries_countries():
-    return {'data': db.get_vaccinations()}
+def get_vaccinations():
+    query = request.args.to_dict()
+    query.setdefault('sort', 'asc')
+    query.setdefault('order_by', 'iso_code')
+    return {'data': db.get_vaccinations(query)}
 
 
 @app.route('/country-list', endpoint='country-list')
