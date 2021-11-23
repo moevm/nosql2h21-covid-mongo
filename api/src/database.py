@@ -8,6 +8,7 @@ import operator
 from datetime import datetime
 from typing import List
 
+import pymongo
 from pymongo import MongoClient
 
 DATABASE_NAME = 'covid'
@@ -56,8 +57,41 @@ class DataBase:
             }
         }
 
-    def get_countries(self):
-        return list(self.__countries.find({}, {'_id': 0}))
+    def get_countries(
+            self, iso_code, continent, location, age_65_older, age_70_older,
+            median_age, population, population_density, sort, order_by
+    ):
+        def parse_range(x: str) -> dict:
+            x = list(map(int, x.split('-')))
+            if len(x) == 2:
+                return {'$gte': x[0], '$lte': x[1]}
+            if len(x) == 1:
+                return {'$gte': x[0]}
+            return {}
+        d = {}
+        if iso_code:
+            d['iso_code'] = iso_code
+        if continent:
+            d['continent'] = continent
+        if location:
+            d['location'] = location
+        if age_65_older:
+            d['age_65_older'] = parse_range(age_65_older)
+        if age_70_older:
+            d['age_70_older'] = parse_range(age_70_older)
+        if median_age:
+            d['median_age'] = parse_range(median_age)
+        if population:
+            d['population'] = parse_range(population)
+        if population_density:
+            d['population_density'] = parse_range(population_density)
+        print(d, flush=True)
+        if sort is None:
+            return list(self.__countries.find(d, {'_id': 0}))
+        if sort == 'asc':
+            return list(self.__countries.find(d, {'_id': 0}).sort(order_by, pymongo.ASCENDING))
+        if sort == 'desc':
+            return list(self.__countries.find(d, {'_id': 0}).sort(order_by, pymongo.DESCENDING))
 
     def get_cases(self):
         return list(self.__cases.find({}, {'_id': 0}))
