@@ -48,7 +48,7 @@ def import_database():
         db.parse_data(data)
         return 'Success', 200
     except JSONDecodeError as err:
-        return f'JSONDecodeError | {err}', 500
+        return f'JSONDecodeError | {err}', 400
 
 
 @app.route('/export-database', endpoint='export-database')
@@ -72,31 +72,35 @@ def get_country():
     return {'data': country}
 
 
+def save_getting_data_from_db(f):
+    try:
+        query = request.args.to_dict()
+        query.setdefault('sort', 'asc')
+        query.setdefault('order_by', 'iso_code')
+        return {'data': f(query)}
+    except ValueError as err:
+        return {'error': {
+            'message': str(err),
+            'query': request.args.to_dict()
+        }}, 400
+
+
 @app.route('/data-countries', endpoint='data-countries')
 @cross_origin()
 def get_countries():
-    query = request.args.to_dict()
-    query.setdefault('sort', 'asc')
-    query.setdefault('order_by', 'iso_code')
-    return {'data': db.get_countries(query)}
+    return save_getting_data_from_db(db.get_countries)
 
 
 @app.route('/data-cases', endpoint='data-cases')
 @cross_origin()
 def get_cases():
-    query = request.args.to_dict()
-    query.setdefault('sort', 'asc')
-    query.setdefault('order_by', 'iso_code')
-    return {'data': db.get_cases(query)}
+    return save_getting_data_from_db(db.get_cases)
 
 
 @app.route('/data-vaccinations', endpoint='data-vaccinations')
 @cross_origin()
 def get_vaccinations():
-    query = request.args.to_dict()
-    query.setdefault('sort', 'asc')
-    query.setdefault('order_by', 'iso_code')
-    return {'data': db.get_vaccinations(query)}
+    return save_getting_data_from_db(db.get_vaccinations)
 
 
 @app.route('/country-list', endpoint='country-list')
