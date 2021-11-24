@@ -1,6 +1,9 @@
 import React from 'react';
 
 import Box from '@mui/material/Box';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListSubheader from '@mui/material/ListSubheader';
 import TextField from '@mui/material/TextField'; 
 import DesktopDatePicker from '@mui/lab/DesktopDatePicker';
 import { subDays, addDays } from 'date-fns';
@@ -13,7 +16,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const DateSelect = ({value={dateFrom: null, dateTo: null}, onChange, vertical}) => {
+const DateSelect = ({value={dateFrom: null, dateTo: null}, onChange, vertical, label=""}) => {
   const [date, setDate] = React.useState({
     dateFrom: null,
     dateTo: null,
@@ -50,29 +53,45 @@ const DateSelect = ({value={dateFrom: null, dateTo: null}, onChange, vertical}) 
     onChange(newDate)
   }
 
-  return (
-    <Box sx={{display: "flex", alignItems: "center", flexDirection: vertical ? "column" : "row"}}>
-      <Box className={classes.date}>
-        <DesktopDatePicker
-          value={value.dateFrom}
-          label="От"
-          inputFormat="dd.MM.yyyy"
-          mask="__.__.____"
-          onChange={onDateFromChange}
-          renderInput={(params)=><TextField {...params}/>}
-        />
-      </Box>
+  const verticalList = (from, to) => (
+    <List subheader={<ListSubheader>{label}</ListSubheader>}>
+      <ListItem>{from}</ListItem>
+      <ListItem>{to}</ListItem>
+    </List>
+  )
 
-      <Box className={classes.date}>
-        <DesktopDatePicker
-          value={value.dateTo}
-          label="До"
-          inputFormat="dd.MM.yyyy"
-          mask="__.__.____"
-          onChange={onDateToChange}
-          renderInput={(params)=><TextField {...params}/>}
-        />
-      </Box>
+  const horizontalList = (from, to) => {
+    <>
+      <Box className={classes.date}>{from}</Box>
+      <Box className={classes.date}>{to}</Box>
+    </>
+  }
+
+  const from = (
+    <DesktopDatePicker
+      value={value.dateFrom}
+      label="От"
+      inputFormat="dd.MM.yyyy"
+      mask="__.__.____"
+      onChange={onDateFromChange}
+      renderInput={(params)=><TextField {...params}/>}
+    />
+  )
+
+  const to = (
+    <DesktopDatePicker
+      value={value.dateTo}
+      label="До"
+      inputFormat="dd.MM.yyyy"
+      mask="__.__.____"
+      onChange={onDateToChange}
+      renderInput={(params)=><TextField {...params}/>}
+    />
+  )
+
+  return (
+    <Box sx={{display: "flex", alignItems: "center"}}>
+      {vertical ? verticalList(from, to) : horizontalList(from, to)}
     </Box>
   )
 }

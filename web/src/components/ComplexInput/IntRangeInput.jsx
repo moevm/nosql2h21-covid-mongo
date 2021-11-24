@@ -7,7 +7,7 @@ import ListSubheader from '@mui/material/ListSubheader';
 import TextField from '@mui/material/TextField';
 
 const IntRangeInput = ({label="", value={from: null, to: null}, onChange}) => {
-  const onChange_ = onChange || (() => {})
+  onChange = onChange || (() => {})
 
   const [state, setState] = React.useState({
     from: null,
@@ -16,8 +16,8 @@ const IntRangeInput = ({label="", value={from: null, to: null}, onChange}) => {
   })
 
   React.useEffect(() => {
-    onChange_(state)
-  }, [state])
+    onChange(state)
+  }, [state, onChange])
 
   const handleFromChange = (event) => {
     const newValue = {from: event.target.value.replace(/[^0-9]/g, ""), to: state.to}
@@ -31,7 +31,7 @@ const IntRangeInput = ({label="", value={from: null, to: null}, onChange}) => {
 
   return (
     <Box sx={{display: "flex", alignItems: "center"}}>
-      <List subheader={<ListSubheader>{label}</ListSubheader>}>
+      <List subheader={<ListSubheader>{label}</ListSubheader>} sx={{width: "100%"}}>
         <ListItem>
           <TextField
             fullWidth

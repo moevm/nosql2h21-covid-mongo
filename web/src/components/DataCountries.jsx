@@ -134,7 +134,9 @@ const DataCountries = () => {
   const [order, setOrder] = React.useState("");
   const [orderBy, setOrderBy] = React.useState("");
 
-  const [filters, setFilters] = React.useState({});
+  const [filters, setFilters] = React.useState(columns.reduce((acc, column)=>({...acc, [column.field]: null}),{}));
+
+  console.log(filters)
 
   const [countries, performCountriesFetch] = useFetch(DATA_COUNTRIES);
 
@@ -161,6 +163,20 @@ const DataCountries = () => {
     const isAsc = orderBy === field && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
     setOrderBy(field);
+  }
+
+  const handleFilterChange = (newFilters) => {
+    if (Object.keys(filters).length !== Object.keys(newFilters).length) {
+      setFilters(newFilters);
+      return
+    }
+
+    for(const key in filters) {
+      if (filters[key] !== newFilters[key]) {
+        setFilters(newFilters);
+        break;
+      }
+    }
   }
 
   const Head = ({order="", orderBy="", onSort}) => {
@@ -246,7 +262,7 @@ const DataCountries = () => {
             <ChevronLeftIcon />
           </IconButton>
         </Box>
-        <DataCountriesFilter value={filters} onChange={(value)=>{setFilters(value)}}/>
+        <DataCountriesFilter value={filters} onChange={handleFilterChange}/>
       </Drawer>
 
       <Box sx={{display: "flex"}}>
