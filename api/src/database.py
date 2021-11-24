@@ -8,6 +8,7 @@ import operator
 from datetime import datetime
 from typing import List
 
+import pymongo
 from pymongo import MongoClient
 
 DATABASE_NAME = 'covid'
@@ -56,14 +57,58 @@ class DataBase:
             }
         }
 
-    def get_countries(self):
-        return list(self.__countries.find({}, {'_id': 0}))
+    @staticmethod
+    def parse_range(x: str) -> dict:
+        x = x.split('|')
+        if len(x) == 1:
+            return {'$gte': float(x[0])}
+        if len(x) == 2:
+            if x[0] == '':
+                return {'$lte': float(x[1])}
+            if x[1] == '':
+                return {'$gte': float(x[0])}
+            return {'$gte': float(x[0]), '$lte': float(x[1])}
+        return {}
 
-    def get_cases(self):
-        return list(self.__cases.find({}, {'_id': 0}))
+    @staticmethod
+    def parse_date(x):
+        x = x.split('|')
+        if len(x) == 1:
+            return {'$gte': datetime.strptime(x[0], '%Y-%m-%d')}
+        if len(x) == 2:
+            if x[0] == '':
+                return {'$lte': datetime.strptime(x[1], '%Y-%m-%d')}
+            if x[1] == '':
+                return {'$gte': datetime.strptime(x[0], '%Y-%m-%d')}
+            return {'$gte': datetime.strptime(x[0], '%Y-%m-%d'),
+                    '$lte': datetime.strptime(x[1], '%Y-%m-%d')}
+        return {}
 
-    def get_vaccinations(self):
-        return list(self.__vaccinations.find({}, {'_id': 0}))
+    def get_collection_by_query(self, collection, query, extra_fields=None):
+        if extra_fields is None:
+            extra_fields = ['iso_code', 'date']
+
+        sort = query.pop('sort')
+        order_by = query.pop('order_by')
+        for key in query.keys():
+            if key in extra_fields:
+                if key == 'date':
+                    query[key] = self.parse_date(query[key])
+            elif query.get(key, None) is not None:
+                query[key] = self.parse_range(query[key])
+        if sort == 'asc':
+            return list(collection.find(query, {'_id': 0}).sort(order_by, pymongo.ASCENDING))
+        if sort == 'desc':
+            return list(collection.find(query, {'_id': 0}).sort(order_by, pymongo.DESCENDING))
+
+    def get_countries(self, query):
+        return self.get_collection_by_query(self.__countries, query, ['iso_code', 'location', 'continent'])
+
+    def get_cases(self, query):
+        return self.get_collection_by_query(self.__cases, query)
+
+    def get_vaccinations(self, query):
+        return self.get_collection_by_query(self.__vaccinations, query)
 
     def get_cases_per_day(
             self,
@@ -461,7 +506,7 @@ class DataBase:
 
     def dump_data(self):
         countries = {}
-        for country in self.get_countries():
+        for country in list(self.__countries.find({})):
             countries[country.get('iso_code')] = dict(
                 continent=country.get('continent', None),
                 location=country.get('location', None),
@@ -473,7 +518,7 @@ class DataBase:
                 dict_data={}
             )
 
-        for case in self.get_cases():
+        for case in list(self.__cases.find({})):
             iso_code = case.get('iso_code')
             date = case.get('date').strftime('%Y-%m-%d')
             countries[iso_code]['dict_data'][date] = dict(
@@ -484,8 +529,7 @@ class DataBase:
                 new_cases_per_million=case.get('new_cases_per_million'),
                 new_cases_smoothed_per_million=case.get('new_cases_smoothed_per_million')
             )
-
-        for vaccination in self.get_vaccinations():
+        for vaccination in list(self.__vaccinations.find({})):
             iso_code = vaccination.get('iso_code')
             date = vaccination.get('date').strftime('%Y-%m-%d')
             countries[iso_code]['dict_data'][date].update(
