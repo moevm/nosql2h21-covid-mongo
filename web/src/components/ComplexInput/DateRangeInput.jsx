@@ -13,7 +13,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const DateSelect = ({value={dateFrom: null, dateTo: null}, onChange}) => {
+const DateSelect = ({value={dateFrom: null, dateTo: null}, onChange, vertical}) => {
   const [date, setDate] = React.useState({
     dateFrom: null,
     dateTo: null,
@@ -51,11 +51,11 @@ const DateSelect = ({value={dateFrom: null, dateTo: null}, onChange}) => {
   }
 
   return (
-    <Box sx={{display: "flex"}}>
+    <Box sx={{display: "flex", alignItems: "center", flexDirection: vertical ? "column" : "row"}}>
       <Box className={classes.date}>
         <DesktopDatePicker
           value={value.dateFrom}
-          label="From"
+          label="От"
           inputFormat="dd.MM.yyyy"
           mask="__.__.____"
           onChange={onDateFromChange}
@@ -66,7 +66,7 @@ const DateSelect = ({value={dateFrom: null, dateTo: null}, onChange}) => {
       <Box className={classes.date}>
         <DesktopDatePicker
           value={value.dateTo}
-          label="To"
+          label="До"
           inputFormat="dd.MM.yyyy"
           mask="__.__.____"
           onChange={onDateToChange}

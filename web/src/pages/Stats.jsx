@@ -16,7 +16,7 @@ import AspectRatioBox from 'components/AspectRatioBox';
 import CasesChart from 'components/CasesChart';
 import VaccsChart from 'components/VaccsChart';
 import CountrySelect from 'components/CountrySelect';
-import DateSelect from 'components/DateSelect';
+import DateSelect from 'components/ComplexInput/DateRangeInput';
 
 const tab_incidents = "Заболевамость";
 const tab_vaccinations = "Вакцинации";
