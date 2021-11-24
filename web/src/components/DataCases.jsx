@@ -150,16 +150,16 @@ const DataCases = () => {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [dataLength, setDataLength] = React.useState(0);
-  const [order, setOrder] = React.useState("");
-  const [orderBy, setOrderBy] = React.useState("");
+  const [order, setOrder] = React.useState(null);
+  const [orderBy, setOrderBy] = React.useState(null);
 
   const [filters, setFilters] = React.useState(columns.reduce((acc, column)=>({...acc, [column.field]: null}),{}));
 
   const [cases, performCasesFetch] = useFetch(DATA_CASES);
 
   React.useEffect(() => {
-    performCasesFetch();
-  }, [performCasesFetch])
+    performCasesFetch({sort: order, order_by: orderBy, ...filters});
+  }, [performCasesFetch, filters, order, orderBy])
 
   React.useEffect(() => {
     if (cases.data?.data) {

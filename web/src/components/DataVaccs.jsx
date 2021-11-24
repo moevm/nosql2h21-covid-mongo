@@ -160,8 +160,8 @@ const DataVaccs = () => {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [dataLength, setDataLength] = React.useState(0);
-  const [order, setOrder] = React.useState("");
-  const [orderBy, setOrderBy] = React.useState("");
+  const [order, setOrder] = React.useState(null);
+  const [orderBy, setOrderBy] = React.useState(null);
 
   const [filters, setFilters] = React.useState(columns.reduce((acc, column)=>({...acc, [column.field]: null}),{}));
 
@@ -170,8 +170,8 @@ const DataVaccs = () => {
   console.log(vaccs)
 
   React.useEffect(() => {
-    performVaccsFetch();
-  }, [performVaccsFetch])
+    performVaccsFetch({sort: order, order_by: orderBy, ...filters});
+  }, [performVaccsFetch, filters, order, orderBy])
 
   React.useEffect(() => {
     if (vaccs.data?.data) {

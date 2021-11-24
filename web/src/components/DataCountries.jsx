@@ -131,8 +131,8 @@ const DataCountries = () => {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [dataLength, setDataLength] = React.useState(0);
-  const [order, setOrder] = React.useState("");
-  const [orderBy, setOrderBy] = React.useState("");
+  const [order, setOrder] = React.useState(null);
+  const [orderBy, setOrderBy] = React.useState(null);
 
   const [filters, setFilters] = React.useState(columns.reduce((acc, column)=>({...acc, [column.field]: null}),{}));
 
@@ -141,8 +141,8 @@ const DataCountries = () => {
   const [countries, performCountriesFetch] = useFetch(DATA_COUNTRIES);
 
   React.useEffect(() => {
-    performCountriesFetch();
-  }, [performCountriesFetch])
+    performCountriesFetch({sort: order, order_by: orderBy, ...filters});
+  }, [performCountriesFetch, filters, order, orderBy])
 
   React.useEffect(() => {
     if (countries.data?.data) {
