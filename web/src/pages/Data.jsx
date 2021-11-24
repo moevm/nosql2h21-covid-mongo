@@ -16,7 +16,7 @@ import DataCountries from 'components/DataCountries';
 import DataCases from 'components/DataCases';
 import DataVaccs from 'components/DataVaccs';
 import useFetch from "../hooks/useFetch";
-import {EXPORT_DB, RESET_DB} from "../api/endpoints";
+import {EXPORT_DB, IMPORT_DB, RESET_DB} from "../api/endpoints";
 import api from "../api/api";
 
 const tab_countries = "Countries";
@@ -57,8 +57,10 @@ const Data = () => {
   const classes = useStyles()
 
   const [resetDB, performResetDB] = useFetch(RESET_DB);
+  const [importDB, performImportDB] = useFetch(IMPORT_DB);
 
   console.log(resetDB);
+  console.log(importDB);
 
   const resetDataBase = () => {
     performResetDB();
@@ -68,9 +70,28 @@ const Data = () => {
     api.download(EXPORT_DB);
   };
 
+  const importDataBase = () => {
+    upload.click();
+  };
+
+  function onChangeFile(event) {
+    event.stopPropagation();
+    event.preventDefault();
+    var file = event.target.files[0];
+    performImportDB(file)
+  }
+
+  let upload = null;
+
   return (
     <Box className={classes.root}>
       <Box className={classes.topSelector}>
+        <input id="myInput"
+           type="file"
+           ref={(ref) => upload = ref}
+           style={{display: 'none'}}
+           onChange={onChangeFile.bind(this)}
+        />
         <Tabs value={currentTab} onChange={(_, val)=>{setCurrentTab(val)}}>
           <Tab className={classes.button} variant="outlined" label={tab_countries} id={0}/>
           <Tab className={classes.button} variant="outlined" label={tab_cases} id={1}/>
@@ -80,7 +101,7 @@ const Data = () => {
         <Box>
           <Button sx={{m: 1}} startIcon={<ReplayIcon/>} onClick={resetDataBase}> Сбросить </Button>
           <Button sx={{m: 1}} startIcon={<DownloadIcon/>} onClick={exportDataBase}> Скачать </Button>
-          <Button sx={{m: 1}} startIcon={<UploadIcon/>}> Загрузить </Button>
+          <Button sx={{m: 1}} startIcon={<UploadIcon/>} onClick={importDataBase}> Загрузить </Button>
         </Box>
       </Box>
 

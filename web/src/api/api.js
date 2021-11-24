@@ -17,7 +17,7 @@ class api {
             url.search = new URLSearchParams(dataWithoutBlanks).toString();
             return fetch(url, {method});
         } else {
-            return fetch(url, {method, body: dataWithoutBlanks});
+            return fetch(url, {method, body: data});
         }
     }
 
