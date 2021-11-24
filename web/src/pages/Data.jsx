@@ -17,6 +17,7 @@ import DataCases from 'components/DataCases';
 import DataVaccs from 'components/DataVaccs';
 import useFetch from "../hooks/useFetch";
 import {EXPORT_DB, RESET_DB} from "../api/endpoints";
+import api from "../api/api";
 
 const tab_countries = "Countries";
 const tab_cases = "Cases";
@@ -56,17 +57,15 @@ const Data = () => {
   const classes = useStyles()
 
   const [resetDB, performResetDB] = useFetch(RESET_DB);
-  const [exportDB, performExportDB] = useFetch(EXPORT_DB);
 
   console.log(resetDB);
-  console.log(exportDB);
 
   const resetDataBase = () => {
     performResetDB();
   };
 
   const exportDataBase = () => {
-    performExportDB();
+    api.download(EXPORT_DB);
   };
 
   return (
