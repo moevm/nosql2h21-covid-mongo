@@ -47,7 +47,7 @@ def reset_db():
         with open('/app/owid-covid-data.json', encoding='utf-8') as file:
             data = json.load(file)
         db.parse_data(data)
-        return 'Success', 200
+        return {'data': 'Success'}, 200
     except JSONDecodeError as err:
         return f'JSONDecodeError | {err}', 400
 
@@ -58,7 +58,7 @@ def import_database():
     try:
         data = json.loads(request.data.decode('utf-8'))
         db.parse_data(data)
-        return 'Success', 200
+        return {'data': 'Success'}, 200
     except JSONDecodeError as err:
         return f'JSONDecodeError | {err}', 400
 

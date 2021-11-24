@@ -6,6 +6,9 @@ export const DATA_COUNTRIES = "data_countries"
 export const DATA_CASES = "data_cases"
 export const DATA_VACCS = "data_vaccs"
 
+export const RESET_DB = "reset_db"
+export const EXPORT_DB = "export_database"
+
 
 const ENDPOINTS = {
     [CASES_PER_DAY]: {
@@ -35,6 +38,16 @@ const ENDPOINTS = {
 
     [DATA_VACCS]: {
         uri: "/data-vaccinations",
+        method: "GET"
+    },
+
+    [RESET_DB]: {
+        uri: "/reset-db",
+        method: "POST"
+    },
+
+    [EXPORT_DB]: {
+        uri: "/export-database",
         method: "GET"
     }
 }

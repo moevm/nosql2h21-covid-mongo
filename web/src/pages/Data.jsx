@@ -15,6 +15,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import DataCountries from 'components/DataCountries';
 import DataCases from 'components/DataCases';
 import DataVaccs from 'components/DataVaccs';
+import useFetch from "../hooks/useFetch";
+import {EXPORT_DB, RESET_DB} from "../api/endpoints";
 
 const tab_countries = "Countries";
 const tab_cases = "Cases";
@@ -53,6 +55,20 @@ const Data = () => {
   const [currentTab, setCurrentTab] = React.useState(0);
   const classes = useStyles()
 
+  const [resetDB, performResetDB] = useFetch(RESET_DB);
+  const [exportDB, performExportDB] = useFetch(EXPORT_DB);
+
+  console.log(resetDB);
+  console.log(exportDB);
+
+  const resetDataBase = () => {
+    performResetDB();
+  };
+
+  const exportDataBase = () => {
+    performExportDB();
+  };
+
   return (
     <Box className={classes.root}>
       <Box className={classes.topSelector}>
@@ -63,8 +79,8 @@ const Data = () => {
         </Tabs>
 
         <Box>
-          <Button sx={{m: 1}} startIcon={<ReplayIcon/>}> Сбросить </Button>
-          <Button sx={{m: 1}} startIcon={<DownloadIcon/>}> Скачать </Button>
+          <Button sx={{m: 1}} startIcon={<ReplayIcon/>} onClick={resetDataBase}> Сбросить </Button>
+          <Button sx={{m: 1}} startIcon={<DownloadIcon/>} onClick={exportDataBase}> Скачать </Button>
           <Button sx={{m: 1}} startIcon={<UploadIcon/>}> Загрузить </Button>
         </Box>
       </Box>

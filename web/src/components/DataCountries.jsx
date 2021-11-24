@@ -136,8 +136,6 @@ const DataCountries = () => {
 
   const [filters, setFilters] = React.useState(columns.reduce((acc, column)=>({...acc, [column.field]: null}),{}));
 
-  console.log(filters)
-
   const [countries, performCountriesFetch] = useFetch(DATA_COUNTRIES);
 
   React.useEffect(() => {
