@@ -6,9 +6,10 @@ import ListItem from '@mui/material/ListItem';
 import ListSubheader from '@mui/material/ListSubheader';
 import TextField from '@mui/material/TextField'; 
 import DesktopDatePicker from '@mui/lab/DesktopDatePicker';
-import { subDays, addDays } from 'date-fns';
+import { subDays, addDays, isValid } from 'date-fns';
 
 import {makeStyles} from '@material-ui/core/styles';
+
 
 const useStyles = makeStyles((theme) => ({
   date: {
@@ -16,7 +17,14 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const DateSelect = ({value={dateFrom: null, dateTo: null}, onChange, vertical, label=""}) => {
+const isDateGood = (date) => {
+  return (
+    (date.dateFrom === null || (isValid(date.dateFrom) && date.dateFrom?.getFullYear() >= 1900)) &&
+    (date.dateTo === null || (isValid(date.dateTo) && date.dateTo?.getFullYear() >= 1900))
+  )
+}
+
+const DateSelect = ({value={dateFrom: null, dateTo: null}, onChange, vertical=false, label=""}) => {
   const [date, setDate] = React.useState({
     dateFrom: null,
     dateTo: null,
@@ -36,7 +44,10 @@ const DateSelect = ({value={dateFrom: null, dateTo: null}, onChange, vertical, l
     }
 
     setDate(newDate)
-    onChange(newDate)
+
+    if (isDateGood(newDate)) {
+      onChange(newDate)
+    }
   }
 
   const onDateToChange = (newToDate) => {
@@ -50,7 +61,6 @@ const DateSelect = ({value={dateFrom: null, dateTo: null}, onChange, vertical, l
     }
 
     setDate(newDate)
-    onChange(newDate)
   }
 
   const verticalList = (from, to) => (
@@ -60,12 +70,12 @@ const DateSelect = ({value={dateFrom: null, dateTo: null}, onChange, vertical, l
     </List>
   )
 
-  const horizontalList = (from, to) => {
+  const horizontalList = (from, to) => (
     <>
       <Box className={classes.date}>{from}</Box>
       <Box className={classes.date}>{to}</Box>
     </>
-  }
+  )
 
   const from = (
     <DesktopDatePicker
