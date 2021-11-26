@@ -61,6 +61,10 @@ const DateSelect = ({value={dateFrom: null, dateTo: null}, onChange, vertical=fa
     }
 
     setDate(newDate)
+
+    if (isDateGood(newDate)) {
+      onChange(newDate)
+    }
   }
 
   const verticalList = (from, to) => (
