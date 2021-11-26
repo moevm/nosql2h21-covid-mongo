@@ -500,9 +500,12 @@ class DataBase:
                                 **vaccination
                             })
 
-        self.__add_countries(countries)
-        self.__add_cases(cases)
-        self.__add_vaccinations(vaccinations)
+        if countries:
+            self.__add_countries(countries)
+        if cases:
+            self.__add_cases(cases)
+        if vaccinations:
+            self.__add_vaccinations(vaccinations)
 
     def dump_data(self):
         countries = {}
