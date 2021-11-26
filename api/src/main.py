@@ -6,11 +6,12 @@ import datetime
 import json
 from json import JSONDecodeError
 
-from flask import Flask, render_template, request, send_file
+from flask import Flask, render_template, request, send_file, Response
 from flask_cors import CORS, cross_origin
 
 import settings
 from database import DataBase
+from utils import json_generator
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -47,7 +48,7 @@ def reset_db():
         with open('/app/owid-covid-data.json', encoding='utf-8') as file:
             data = json.load(file)
         db.parse_data(data)
-        return {'data': 'Success'}, 200
+        return {'status': 'success'}, 200
     except JSONDecodeError as err:
         return f'JSONDecodeError | {err}', 400
 
@@ -58,7 +59,7 @@ def import_database():
     try:
         data = json.loads(request.data.decode('utf-8'))
         db.parse_data(data)
-        return {'data': 'Success'}, 200
+        return {'status': 'success'}, 200
     except JSONDecodeError as err:
         return f'JSONDecodeError | {err}', 400
 
@@ -67,9 +68,11 @@ def import_database():
 @cross_origin()
 def export_database():
     data = db.dump_data()
-    with open('/tmp/dataset.json', 'w', encoding='utf-8') as fp:
-        json.dump(data, fp, indent=2)
-    return send_file('/tmp/dataset.json', as_attachment=True)
+    return Response(
+        json_generator(data, 100),
+        headers={"Content-Disposition": "attachment; filename=database.json"},
+        mimetype="text/json"
+    )
 
 
 @app.route('/country', endpoint='country')

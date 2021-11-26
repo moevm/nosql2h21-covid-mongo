@@ -145,7 +145,7 @@ const DataCasesFilter = ({value, onChange}) => {
   )
 }
 
-const DataCases = () => {
+const DataCases = ({reset=false}) => {
   const [openFilters, setOpenFilters] = React.useState(false);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
