@@ -7,17 +7,25 @@ class api {
         this.endpoints = endpoints;
     }
 
+    makeQueryLink(endpoint, data={}) {
+        const {uri} = this.endpoints[endpoint];
+        const url = new URL(`${this.baseUrl}${uri}`);
+
+        const pureData = Object.fromEntries(Object.entries(data).filter(([_, v]) => v != null));
+        if (Object.keys(pureData).length > 0) {
+            url.search = new URLSearchParams(pureData).toString();
+        }
+
+        return url.toString();
+    }
+
     async generateRequest(endpoint, data = {}) {
         const {method, uri} = this.endpoints[endpoint];
-        let url = new URL(`${this.baseUrl}${uri}`);
-        
-        const dataWithoutBlanks = Object.fromEntries(Object.entries(data).filter(([_, v]) => v != null));
 
         if (["GET"].includes(method)) {
-            url.search = new URLSearchParams(dataWithoutBlanks).toString();
-            return fetch(url, {method});
+            return fetch(this.makeQueryLink(endpoint, data), {method});
         } else {
-            return fetch(url, {method, body: dataWithoutBlanks});
+            return fetch(`${this.baseUrl}${uri}`, {method, body: data});
         }
     }
 
