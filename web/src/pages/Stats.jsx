@@ -16,7 +16,7 @@ import AspectRatioBox from 'components/AspectRatioBox';
 import CasesChart from 'components/CasesChart';
 import VaccsChart from 'components/VaccsChart';
 import CountrySelect from 'components/CountrySelect';
-import DateSelect from 'components/DateSelect';
+import DateRangeInput from 'components/ComplexInput/DateRangeInput';
 
 const tab_incidents = "Заболевамость";
 const tab_vaccinations = "Вакцинации";
@@ -156,7 +156,7 @@ export default function Stats() {
 
       <Box className={classes.tools}>
         <Box>
-          <DateSelect
+          <DateRangeInput
             value={{
               dateFrom: stateHistory.present.dateFrom,
               dateTo: stateHistory.present.dateTo
