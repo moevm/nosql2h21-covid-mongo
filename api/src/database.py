@@ -180,14 +180,14 @@ class DataBase:
                 }
             }
         ]))
-        field = 'date'
+        field = 'iso_code'
         result.sort(key=operator.itemgetter(field))
         d = {}
         for k, items in itertools.groupby(result, key=operator.itemgetter(field)):
             d[k] = list(items)
             for x in d[k]:
                 x.pop(field, None)
-            d[k].sort(key=operator.itemgetter('iso_code'))
+            d[k].sort(key=operator.itemgetter('date'))
         return d
 
     def get_vax_per_day(
