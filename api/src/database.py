@@ -3,6 +3,7 @@ docstring
 database helper
 """
 
+import itertools
 import json
 import operator
 from datetime import datetime
@@ -179,8 +180,15 @@ class DataBase:
                 }
             }
         ]))
-        result.sort(key=operator.itemgetter('date'))
-        return result
+        field = 'date'
+        result.sort(key=operator.itemgetter(field))
+        d = {}
+        for k, items in itertools.groupby(result, key=operator.itemgetter(field)):
+            d[k] = list(items)
+            for x in d[k]:
+                x.pop(field, None)
+            d[k].sort(key=operator.itemgetter('iso_code'))
+        return d
 
     def get_vax_per_day(
             self,
