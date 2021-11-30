@@ -20,7 +20,7 @@ import DateRangeInput from 'components/ComplexInput/DateRangeInput';
 import CasesComparisonChart from 'components/CasesComarisonChart';
 
 import useFetch from 'hooks/useFetch';
-import {CASES_PER_DAY, CASES_PER_DAY_EXTRA} from 'api/endpoints';
+import {CASES_PER_DAY_COMP} from 'api/endpoints';
 
 
 const objectDiff = (object1, object2) => Object.keys(object2).reduce((diff, key) => {
@@ -51,8 +51,10 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 const StatsCompare = () => {
-  const [cases1, performCases1Fetch] = useFetch(CASES_PER_DAY)
-  const [cases2, performCases2Fetch] = useFetch(CASES_PER_DAY_EXTRA)
+  // const [cases1, performCases1Fetch] = useFetch(CASES_PER_DAY)
+  // const [cases2, performCases2Fetch] = useFetch(CASES_PER_DAY_EXTRA)
+
+  const [pairedCases, performFetch] = useFetch(CASES_PER_DAY_COMP);
 
   const [stateHistory, setStateHistory] = React.useState({
     past: [],
@@ -107,28 +109,20 @@ const StatsCompare = () => {
   }
 
   React.useEffect(() => {
-    const isoCode = stateHistory.present.country1?.iso_code;
+    const isoCode1 = stateHistory.present.country1?.iso_code;
+    const isoCode2 = stateHistory.present.country2?.iso_code;
     const dateFrom = stateHistory.present.dateFrom;
     const dateTo = stateHistory.present.dateTo;
 
-    performCases1Fetch({
-      iso_code: isoCode,
-      date_from: dateFrom && formatISO(dateFrom, {representation: "date"}),
-      date_to: dateTo && formatISO(dateTo, {representation: "date"})
-    })
-  }, [performCases1Fetch, stateHistory])
+    if (isoCode1 && isoCode2) {
+      performFetch({
+        iso_code: `${isoCode1}|${isoCode2}`,
+        date_from: dateFrom && formatISO(dateFrom, {representation: "date"}),
+        date_to: dateTo && formatISO(dateTo, {representation: "date"})
+      })
+    }
 
-  React.useEffect(() => {
-    const isoCode = stateHistory.present.country2?.iso_code;
-    const dateFrom = stateHistory.present.dateFrom;
-    const dateTo = stateHistory.present.dateTo;
-
-    performCases2Fetch({
-      iso_code: isoCode,
-      date_from: dateFrom && formatISO(dateFrom, {representation: "date"}),
-      date_to: dateTo && formatISO(dateTo, {representation: "date"})
-    })
-  }, [performCases2Fetch, stateHistory])
+  }, [performFetch, stateHistory])
 
   const classes = useStyles();
 
@@ -187,11 +181,15 @@ const StatsCompare = () => {
 
       <Paper>
         <AspectRatioBox ratio={16 / 8}>
-          {(cases1.loading || cases2.loading) || (!(cases1.data && cases2.data) && !(cases1.error && cases2.error))
-          ? loading()
-          : (cases1.error || cases2.error)
-            ? error(cases1.error?.message, cases2.error?.message)
-            : chart(cases1.data, cases2.data)
+          { (stateHistory.present.country1 && stateHistory.present.country2)
+            ? (pairedCases.loading) || (!(pairedCases.data) && !(pairedCases.error))
+              ? loading()
+              : (pairedCases.error)
+                ? error(pairedCases.error?.message)
+                : chart(pairedCases.data)
+            : <Box sx={{display: "flex", width: "100%", height: "100%", justifyContent: "center", alignItems: "center"}}>
+              <Typography variant="h6" component="div">Выберите обе страны</Typography>
+            </Box>
           }
         </AspectRatioBox>
       </Paper>

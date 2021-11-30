@@ -1,5 +1,5 @@
 export const CASES_PER_DAY = "cases_per_day"
-export const CASES_PER_DAY_EXTRA = "cases_per_day_extra"
+export const CASES_PER_DAY_COMP = "cases_per_day_comparison"
 export const VACCS_PER_DAY = "vaccs_per_day"
 
 export const COUNTRY_LIST = "country_list"
@@ -19,8 +19,8 @@ const ENDPOINTS = {
         method: "GET"
     },
 
-    [CASES_PER_DAY_EXTRA]: {
-        uri: "/cases-per-day",
+    [CASES_PER_DAY_COMP]: {
+        uri: "/cases-per-day-comp",
         method: "GET"
     },
 
