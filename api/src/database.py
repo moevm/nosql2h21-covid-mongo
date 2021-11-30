@@ -152,7 +152,7 @@ class DataBase:
                 }
             }, {
                 '$match': {
-                    'count': len(iso_codes)
+                    'count': len(set(iso_codes))
                 }
             }
         ]))
