@@ -108,10 +108,6 @@ export default function Stats() {
     })
   }
 
-  window.stateHistory = stateHistory
-  window.undo = undo
-  window.redo = redo
-
   const onCountrySelect = (country) => {
     dispatch({country});
   }
