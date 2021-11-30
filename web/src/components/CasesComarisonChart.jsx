@@ -114,9 +114,7 @@ tooltipPlugin.positioners.custom = function(items) {
 
 const int = value => ~~value
 
-const CasesComarisonChart = ({data, country1, country2, label="data", smoothedLabel="smoothed data", color1, color2}) => {
-  const dates = Object.keys(data) 
-  
+const CasesComarisonChart = ({data1, data2, country1, country2, label="data", smoothedLabel="smoothed data", color1, color2}) => {
   return (
     <Line
       data={{

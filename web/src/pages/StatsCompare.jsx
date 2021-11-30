@@ -51,9 +51,6 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 const StatsCompare = () => {
-  // const [cases1, performCases1Fetch] = useFetch(CASES_PER_DAY)
-  // const [cases2, performCases2Fetch] = useFetch(CASES_PER_DAY_EXTRA)
-
   const [pairedCases, performFetch] = useFetch(CASES_PER_DAY_COMP);
 
   const [stateHistory, setStateHistory] = React.useState({
@@ -156,20 +153,25 @@ const StatsCompare = () => {
     </Box>
   )
 
-  const chart = (response1, response2) => 
+  const chart = (response) => 
   {
-    return (
-      <CasesComparisonChart
-        data1={response1.data}
-        data2={response2.data}
-        country1={stateHistory.present.country1?.iso_code || "World"}
-        country2={stateHistory.present.country2?.iso_code || "World"}
-        label="new cases"
-        smoothedLabel="7-day avg"
-        color1="#FF9900"
-        color2="#0000FF"
-      />
-    )
+    const data1 = response.data[stateHistory.present.country1?.iso_code];
+    const data2 = response.data[stateHistory.present.country2?.iso_code];
+
+    if (data1 && data2) {
+      return (
+        <CasesComparisonChart
+          data1={data1}
+          data2={data2}
+          country1={stateHistory.present.country1?.iso_code || "World"}
+          country2={stateHistory.present.country2?.iso_code || "World"}
+          label="new cases"
+          smoothedLabel="7-day avg"
+          color1="#FF9900"
+          color2="#0000FF"
+        />
+      )
+    }
   }
 
   return (
