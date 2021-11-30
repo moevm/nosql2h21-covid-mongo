@@ -134,6 +134,18 @@ def get_cases_per_day():
     return {'data': db.get_cases_per_day(iso_code, date_from, date_to)}
 
 
+@app.route('/cases-per-day-comp', endpoint='cases-per-day-comp')
+@cross_origin()
+def get_cases_per_day_compare():
+    iso_codes, date_from, date_to = get_query_params()
+    if iso_codes is not None:
+        iso_codes = iso_codes.split('|')
+        countries = db.get_countries_info(iso_codes)
+        if countries is None:
+            return 'ISO codes not found', 404
+    return {'data': db.get_cases_per_day_compare(iso_codes, date_from, date_to)}
+
+
 @app.route('/vax-per-day', endpoint='vax-per-day')
 @cross_origin()
 def get_vax_per_day():
