@@ -2,7 +2,7 @@ import React, {useEffect} from 'react';
 import CircularProgress from '@mui/material/CircularProgress'
 import SentimentVeryDissatisfiedIcon from '@mui/icons-material/SentimentVeryDissatisfied';
 import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography'
+import Typography from '@mui/material/Typography';
 import { formatISO } from 'date-fns';
 
 import useFetch from 'hooks/useFetch';

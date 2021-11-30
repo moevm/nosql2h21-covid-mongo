@@ -8,7 +8,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import useFetch from 'hooks/useFetch';
 import { COUNTRY_LIST } from 'api/endpoints';
 
-const CountrySelect = ({value=null, onChange}) => {
+const CountrySelect = ({value=null, label="Выбор страны", onChange}) => {
   const [countries, performCountriesFetch] = useFetch(COUNTRY_LIST)
 
   React.useEffect(() => {
@@ -28,7 +28,7 @@ const CountrySelect = ({value=null, onChange}) => {
   return (
     <Autocomplete
       value={value}
-      sx={{width: 200}}
+      sx={{width: 250, m:1}}
       options={options}
       autoHighlight
       getOptionLabel={(option) => option.location}
@@ -42,7 +42,7 @@ const CountrySelect = ({value=null, onChange}) => {
       renderInput={(params) => (
         <TextField
           {...params}
-          label="Choose a country"
+          label={label}
           InputProps={{
             ...params.InputProps,
             endAdornment: (

@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 import { Chart } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 
@@ -10,7 +10,7 @@ const setupDataset = (data, label, color) => ({
   borderColor: color.hex(),
   borderWidth: 1,
   fill: "origin",
-  backgroundColor: color.alpha(0.8).hex(),
+  backgroundColor: color.alpha(0.4).hex(),
   pointRadius: 0,
   hoverRadius: 0,
   showLine: true,
@@ -49,9 +49,9 @@ const chartOptions = {
     tooltip: {
       displayColors: false,
       position: "custom",
-      callbacks: {
-        afterTitle: (items) => {items.reverse()}
-      }
+      // // callbacks: {
+      // //   afterTitle: (items) => {items.reverse()}
+      // // }
     },
   }
 }
@@ -98,32 +98,42 @@ const verticalLinePlugin = {
 
 const tooltipPlugin = Chart.registry.getPlugin('tooltip');
 tooltipPlugin.positioners.custom = function(items) {
-  if (items.length) {
-    return {
-      x: items[0].element.x,
-      y: items[0].element.y,
-    };
+  const pos = tooltipPlugin.positioners.average(items)
+
+  if (pos === false) {
+    return false
   }
-  return false
+
+  const chart = this._chart;
+
+  return {
+    x: pos.x,
+    y: chart.chartArea.top
+  }
 }
 
 const int = value => ~~value
 
-const WorldChart = ({data, label="data", smoothedLabel="smoothed data", primaryColor="#737373", secondaryColor="#4d4d4d"}) => {
-  primaryColor = chroma(primaryColor)
-  secondaryColor = chroma(secondaryColor)
-
+const CasesComarisonChart = ({data1, data2, country1, country2, label="data", smoothedLabel="smoothed data", color1, color2}) => {
   return (
     <Line
       data={{
         datasets: [
           setupSmoothedDataset(
-            data.map(item => ({x: item.date, y: int(item.value_smoothed)})),
-            smoothedLabel, secondaryColor
+            data2.map(item => ({x: item.date, y: int(item.new_cases_smoothed)})),
+            `${country2} ${smoothedLabel}`, chroma(color2).darken(2)
           ),
           setupDataset(
-            data.map(item => ({x: item.date, y: item.value})),
-            label, primaryColor
+            data2.map(item => ({x: item.date, y: item.new_cases})),
+            `${country2} ${label}`, chroma(color2)
+          ),
+          setupSmoothedDataset(
+            data1.map(item => ({x: item.date, y: int(item.new_cases_smoothed)})),
+            `${country1} ${smoothedLabel}`, chroma(color1).darken(2)
+          ),
+          setupDataset(
+            data1.map(item => ({x: item.date, y: item.new_cases})),
+            `${country1} ${label}`, chroma(color1)
           ),
         ]
       }}
@@ -134,4 +144,4 @@ const WorldChart = ({data, label="data", smoothedLabel="smoothed data", primaryC
   )
 }
 
-export default WorldChart
+export default CasesComarisonChart
