@@ -3,6 +3,7 @@ docstring
 database helper
 """
 
+import itertools
 import json
 import operator
 from datetime import datetime
@@ -136,6 +137,59 @@ class DataBase:
         result.sort(key=operator.itemgetter('date'))
         return result
 
+    def get_cases_per_day_compare(
+            self,
+            iso_codes,
+            date_from,
+            date_to
+    ):
+        first_stage = self.__get_first_stage_of_aggregate(iso_codes, date_from, date_to)
+        dates = list(self.__cases.aggregate([
+            first_stage, {
+                '$group': {
+                    '_id': '$date',
+                    'count': {'$sum': 1}
+                }
+            }, {
+                '$match': {
+                    'count': len(iso_codes)
+                }
+            }
+        ]))
+        dates = [x['_id'] for x in dates]
+        result = list(self.__cases.aggregate([
+            {
+                '$match': {
+                    'date': {'$in': dates},
+                    'iso_code': {'$in': iso_codes}
+                }
+            },
+            {
+                '$group': {
+                    '_id': {'date': '$date', 'iso_code': '$iso_code'},
+                    'new_cases': {'$sum': '$new_cases'},
+                    'new_cases_smoothed': {'$sum': '$new_cases_smoothed'}
+                }
+            }, {
+                '$project': {
+                    'date': {'$dateToString': {'format': '%Y-%m-%d', 'date': '$_id.date'}},
+                    'iso_code': '$_id.iso_code',
+                    'new_cases': '$new_cases',
+                    'new_cases_smoothed': '$new_cases_smoothed',
+                    '_id': 0
+                }
+            }
+        ]))
+        field = 'date'
+        result.sort(key=operator.itemgetter(field))
+        d = {}
+        for k, items in itertools.groupby(result, key=operator.itemgetter(field)):
+            d[k] = list(items)
+            for x in d[k]:
+                x.pop(field, None)
+            d[k].sort(key=operator.itemgetter('iso_code'))
+        return d
+
     def get_vax_per_day(
             self,
             iso_code,
@@ -176,6 +230,12 @@ class DataBase:
     def get_country_info(self, iso_code):
         return self.__countries.find_one(
             {'iso_code': iso_code},
+            {'_id': 0}
+        )
+
+    def get_countries_info(self, iso_codes):
+        return self.__countries.find_one(
+            {'iso_code': {'$in': iso_codes}},
             {'_id': 0}
         )
 
