@@ -111,6 +111,45 @@ class DataBase:
     def get_vaccinations(self, query):
         return self.get_collection_by_query(self.__vaccinations, query)
 
+    def aggregate(self, collection, field_name, agg_func, query):
+        iso_codes = [query.get('iso_code', None)]
+        date_from = query.get('date_from', None)
+        date_to = query.get('date_to', None)
+        if agg_func is None:
+            return []
+        if agg_func == 'total':
+            agg_func = 'sum'
+        first_stage = self.__get_first_stage_of_aggregate(iso_codes, date_from, date_to)
+        d = list(collection.aggregate([
+            first_stage, {
+                '$group': {
+                    '_id': '$iso_code',
+                    'value': {
+                        f'${agg_func}': f'${field_name}'
+                    },
+                }
+            }, {
+                '$project': {
+                    '_id': 0,
+                }
+            }
+        ]))[0]
+        day = collection.find_one({field_name: d['value']})
+        date = None
+        if day:
+            date = day.get('date', None)
+        if date:
+            d['date'] = date.strftime('%Y-%m-%d')
+        else:
+            d['date'] = None
+        return d
+
+    def aggregate_cases(self, *args):
+        return self.aggregate(self.__cases, 'new_cases', *args)
+
+    def aggregate_vax(self, *args):
+        return self.aggregate(self.__vaccinations, 'new_vaccinations', *args)
+
     def get_cases_per_day(
             self,
             iso_code,

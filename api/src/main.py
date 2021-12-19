@@ -6,7 +6,7 @@ import datetime
 import json
 from json import JSONDecodeError
 
-from flask import Flask, render_template, request, send_file, Response
+from flask import Flask, render_template, request, Response
 from flask_cors import CORS, cross_origin
 
 import settings
@@ -73,6 +73,18 @@ def export_database():
         headers={"Content-Disposition": "attachment; filename=database.json"},
         mimetype="text/json"
     )
+
+
+@app.route('/aggregate-cases-<agg>', endpoint='aggregate-cases-<agg>')
+@cross_origin()
+def get_aggregate_cases_min(agg):
+    return {'data': db.aggregate_cases(agg, request.args.to_dict())}
+
+
+@app.route('/aggregate-vaccinations-<agg>', endpoint='aggregate-vaccinations-<agg>')
+@cross_origin()
+def get_aggregate_cases_min(agg):
+    return {'data': db.aggregate_vax(agg, request.args.to_dict())}
 
 
 @app.route('/country', endpoint='country')
