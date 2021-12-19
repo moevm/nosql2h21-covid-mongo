@@ -75,16 +75,22 @@ def export_database():
     )
 
 
-@app.route('/aggregate-cases-<agg>', endpoint='aggregate-cases-<agg>')
+@app.route('/aggregate-<type_>-<agg>', endpoint='aggregate-<type_>-<agg>')
 @cross_origin()
-def get_aggregate_cases_min(agg):
-    return {'data': db.aggregate_cases(agg, request.args.to_dict())}
+def get_aggregations(type_, agg):
+    if type_ == 'cases':
+        return {'data': db.aggregate_cases(agg, request.args.to_dict())}
+    if type_ == 'vaccinations':
+        return {'data': db.aggregate_vax(agg, request.args.to_dict())}
+    return {'error': {
+        'query': request.args.to_dict()
+    }}, 400
 
 
-@app.route('/aggregate-vaccinations-<agg>', endpoint='aggregate-vaccinations-<agg>')
+@app.route('/cases-on-density', endpoint='cases-on-density')
 @cross_origin()
-def get_aggregate_cases_min(agg):
-    return {'data': db.aggregate_vax(agg, request.args.to_dict())}
+def get_cases_on_density():
+    return {'data': db.get_cases_on_density(request.args.to_dict())}
 
 
 @app.route('/country', endpoint='country')

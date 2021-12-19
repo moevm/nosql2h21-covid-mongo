@@ -150,6 +150,60 @@ class DataBase:
     def aggregate_vax(self, *args):
         return self.aggregate(self.__vaccinations, 'new_vaccinations', *args)
 
+    def get_cases_on_density(self, query):
+        first_stage = self.__get_first_stage_of_aggregate(
+            date_from=query.get('date_from', None), date_to=query.get('date_to', None)
+        )
+        result = list(self.__cases.aggregate([
+            first_stage, {
+                '$match': {
+                    'new_cases': {'$gte': 0}
+                }
+            }, {
+                '$group': {
+                    '_id': '$iso_code',
+                    'total_cases': {
+                        '$sum': '$new_cases'
+                    }
+                }
+            }, {
+                '$project': {
+                    'iso_code': '$_id',
+                    'total_cases': '$total_cases',
+                    '_id': 0
+                }
+            }, {
+                '$lookup': {
+                    'from': 'countries',
+                    'localField': 'iso_code',
+                    'foreignField': 'iso_code',
+                    'as': 'countries'
+                }
+            }, {
+                '$project': {
+                    'iso_code': '$iso_code',
+                    'total_cases': '$total_cases',
+                    'country': {
+                        '$arrayElemAt': [
+                            '$countries', 0
+                        ]
+                    }
+                }
+            }, {
+                '$project': {
+                    'iso_code': '$iso_code',
+                    'cases': '$total_cases',
+                    'density': '$country.population_density'
+                }
+            }, {
+                '$match': {
+                    'density': {'$ne': None}
+                }
+            }
+        ]))
+        result.sort(key=operator.itemgetter('density'))
+        return result
+
     def get_cases_per_day(
             self,
             iso_code,
