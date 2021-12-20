@@ -112,14 +112,14 @@ class DataBase:
         return self.get_collection_by_query(self.__vaccinations, query)
 
     def aggregate(self, collection, field_name, agg_func, query):
-        iso_codes = [query.get('iso_code', None)]
+        iso_code = query.get('iso_code', None)
         date_from = query.get('date_from', None)
         date_to = query.get('date_to', None)
         if agg_func is None:
             return []
         if agg_func == 'total':
             agg_func = 'sum'
-        first_stage = self.__get_first_stage_of_aggregate(iso_codes, date_from, date_to)
+        first_stage = self.__get_first_stage_of_aggregate([iso_code] if iso_code else None, date_from, date_to)
         d = list(collection.aggregate([
             first_stage, {
                 '$group': {

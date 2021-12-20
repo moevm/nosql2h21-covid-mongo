@@ -78,11 +78,19 @@ def export_database():
 @app.route('/aggregate-<type_>-<agg>', endpoint='aggregate-<type_>-<agg>')
 @cross_origin()
 def get_aggregations(type_, agg):
+    if agg not in ['total', 'min', 'max', 'avg']:
+        return {'error': {
+            'agg': agg,
+            'message': "Only ['total', 'min', 'max', 'avg'] are available",
+            'query': request.args.to_dict(),
+        }}, 400
     if type_ == 'cases':
         return {'data': db.aggregate_cases(agg, request.args.to_dict())}
     if type_ == 'vaccinations':
         return {'data': db.aggregate_vax(agg, request.args.to_dict())}
     return {'error': {
+        'type': type_,
+        'message': "Only ['cases', 'vaccinations'] are available",
         'query': request.args.to_dict()
     }}, 400
 
