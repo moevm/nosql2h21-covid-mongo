@@ -134,6 +134,22 @@ class DataBase:
                 }
             }
         ]))[0]
+        if iso_code is None and agg_func == 'avg':
+            result = list(collection.aggregate([
+                first_stage, {
+                    '$group': {
+                        '_id': '$date',
+                        'value': {'$sum': f'${field_name}'},
+                    }
+                }, {
+                    '$project': {
+                        '_id': 0,
+                    }
+                }
+            ]))
+            size = len(result)
+            sum_ = sum([d['value'] for d in result])
+            d = dict(value=sum_ / size)
         day = collection.find_one({field_name: d['value']})
         date = None
         if day:
