@@ -36,11 +36,15 @@ class DataBase:
             date_from: datetime = None,
             date_to: datetime = None
     ):
+        def get_date(x):
+            if type(x) == str:
+                return datetime.strptime(x, '%Y-%m-%d')
+            return x
         date_bounds = {}
         if date_from:
-            date_bounds['$gte'] = date_from
+            date_bounds['$gte'] = get_date(date_from)
         if date_to:
-            date_bounds['$lte'] = date_to
+            date_bounds['$lte'] = get_date(date_to)
         dates = {}
         if date_bounds:
             dates['date'] = date_bounds
