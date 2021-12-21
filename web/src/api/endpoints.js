@@ -12,6 +12,16 @@ export const RESET_DB = "reset_db"
 export const EXPORT_DB = "export_database"
 export const IMPORT_DB = "import_database"
 
+export const AGGREGATE_CASES_MAX   = "aggregate_cases_min"
+export const AGGREGATE_CASES_MIN   = "aggregate_cases_max"
+export const AGGREGATE_CASES_AVG   = "aggregate_cases_avg"
+export const AGGREGATE_CASES_TOTAL = "aggregate_cases_total"
+
+export const AGGREGATE_VACCS_MAX   = "aggregate_vaccs_min"
+export const AGGREGATE_VACCS_MIN   = "aggregate_vaccs_max"
+export const AGGREGATE_VACCS_AVG   = "aggregate_vaccs_avg"
+export const AGGREGATE_VACCS_TOTAL = "aggregate_vaccs_total"
+
 
 const ENDPOINTS = {
     [CASES_PER_DAY]: {
@@ -31,6 +41,46 @@ const ENDPOINTS = {
 
     [COUNTRY_LIST]: {
         uri: "/country-list",
+        method: "GET"
+    },
+
+    [AGGREGATE_CASES_MIN]: {
+        uri: "/aggregate-cases-min",
+        method: "GET"
+    },
+
+    [AGGREGATE_CASES_MAX]: {
+        uri: "/aggregate-cases-max",
+        method: "GET"
+    },
+
+    [AGGREGATE_CASES_AVG]: {
+        uri: "/aggregate-cases-avg",
+        method: "GET"
+    },
+
+    [AGGREGATE_CASES_TOTAL]: {
+        uri: "/aggregate-cases-total",
+        method: "GET"
+    },
+
+    [AGGREGATE_VACCS_MIN]: {
+        uri: "/aggregate-vaccinations-min",
+        method: "GET"
+    },
+
+    [AGGREGATE_VACCS_MAX]: {
+        uri: "/aggregate-vaccinations-max",
+        method: "GET"
+    },
+
+    [AGGREGATE_VACCS_AVG]: {
+        uri: "/aggregate-vaccinations-avg",
+        method: "GET"
+    },
+
+    [AGGREGATE_VACCS_TOTAL]: {
+        uri: "/aggregate-vaccinations-total",
         method: "GET"
     },
 

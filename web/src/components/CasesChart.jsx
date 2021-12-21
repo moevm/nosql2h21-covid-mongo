@@ -7,10 +7,16 @@ import { formatISO } from 'date-fns';
 
 import useFetch from 'hooks/useFetch';
 import {CASES_PER_DAY} from 'api/endpoints';
+import {AGGREGATE_CASES_MIN} from 'api/endpoints';
+import {AGGREGATE_CASES_MAX} from 'api/endpoints';
+import {AGGREGATE_CASES_AVG} from 'api/endpoints';
+import {AGGREGATE_CASES_TOTAL} from 'api/endpoints';
 
 import WorldChart from 'components/WorldChart';
 import AggregationMenu from 'components/AggregationMenu';
 import AggregationModal from 'components/AggregationModal';
+
+const zip = (a, b) => a.map((k, i) => [k, b[i]]);
 
 const CasesChart = ({isoCode = null, dateFrom = null, dateTo = null}) => {
   const [aggregation, setAggregation] = React.useState(null)
@@ -25,6 +31,13 @@ const CasesChart = ({isoCode = null, dateFrom = null, dateTo = null}) => {
     max: "Максимальное",
   }
 
+  const aggregationFetch = {
+    sum: Object.fromEntries(zip(["status", "performFetch"], useFetch(AGGREGATE_CASES_TOTAL))),
+    average: Object.fromEntries(zip(["status", "performFetch"], useFetch(AGGREGATE_CASES_AVG))),
+    min: Object.fromEntries(zip(["status", "performFetch"], useFetch(AGGREGATE_CASES_MIN))),
+    max: Object.fromEntries(zip(["status", "performFetch"], useFetch(AGGREGATE_CASES_MAX))),
+  } 
+
   useEffect(()=>{
     if (aggregation !== null) {
       setModalOpen(true)
@@ -38,6 +51,18 @@ const CasesChart = ({isoCode = null, dateFrom = null, dateTo = null}) => {
         date_to: dateTo && formatISO(dateTo, {representation: "date"})
       })
   }, [performCasesFetch, isoCode, dateFrom, dateTo])
+
+  const handleMenuClick = (key, value) => {
+    aggregationFetch[key].performFetch({
+      iso_code: isoCode,
+      date_from: dateFrom && formatISO(dateFrom, {representation: "date"}),
+      date_to: dateTo && formatISO(dateTo, {representation: "date"})
+    })
+    if (key === aggregation) {
+      setModalOpen(true)
+    }
+    setAggregation(key);
+  }
 
   const loading = () => (
     <Box sx={{display: "flex", width: "100%", height: "100%", justifyContent: "center", alignItems: "center"}}>
@@ -68,14 +93,14 @@ const CasesChart = ({isoCode = null, dateFrom = null, dateTo = null}) => {
     }));
     return (
       <Box sx={{width: "100%", height: "100%", position: "relative"}}>
-        <AggregationMenu onMenuClick={(key, value)=>{setAggregation(key)}} items={aggregationFunctions}/>
+        <AggregationMenu onMenuClick={handleMenuClick} items={aggregationFunctions}/>
         <WorldChart data={data} label="New cases" smoothedLabel="7-day avg" primaryColor="#174ea6" secondaryColor="#8ab4f8"/>
         <AggregationModal
           open={modalOpen}
           onClose={()=>{setModalOpen(false)}}
           header={`${aggregationFunctions[aggregation]} количество заболевших`}
           datePeriod={{from: dateFrom, to: dateTo}}
-          fetchStatus={{data: null, loading: false, error: null}}
+          fetchState={aggregationFetch[aggregation]?.status || {data: null, loading: false, error: null}}
         />
       </Box>
     )
