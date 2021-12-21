@@ -17,6 +17,7 @@ import { formatISO } from 'date-fns';
 import useFetch from 'hooks/useFetch';
 import {CASES_ON_DENSITY} from 'api/endpoints';
 
+import DensityChart from 'components/DensityChart';
 import AspectRatioBox from 'components/AspectRatioBox';
 import DateRangeInput from 'components/ComplexInput/DateRangeInput';
 
@@ -132,11 +133,6 @@ const DensityStats = () => {
     </Box>
   )
 
-  const chart = (response) => 
-  {
-    return "Место для вашей рекламы" 
-  }
-
   return (
     <Box className={classes.root}>
       <Paper>
@@ -145,7 +141,7 @@ const DensityStats = () => {
               ? loading()
               : (chartData.error)
                 ? error(chartData.error?.message)
-                : chart(chartData.data)
+                : <DensityChart data={chartData.data.data}/>
           }
         </AspectRatioBox>
       </Paper>
