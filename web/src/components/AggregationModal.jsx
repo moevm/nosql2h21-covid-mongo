@@ -47,7 +47,7 @@ const AggregationModal = ({header="Lorem ipsum dolor sit amet consectetur adipis
           <CardContent>
             <Typography variant="h4" component="div" align="center">{header}</Typography>
             <Typography variant="h5" component="div" align="center">{`За период с ${from} до ${to}`}</Typography>
-            <Box sx={{display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center"}}>
+            <Box sx={{display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", m: 2}}>
               {fetchState.loading || (!fetchState.data && !fetchState.error)
                 ? <CircularProgress size="5rem"/>
                 : fetchState.error
