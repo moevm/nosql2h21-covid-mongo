@@ -9,6 +9,9 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardActions from '@mui/material/CardActions';
 import Button from '@mui/material/Button';
+import Box from '@mui/material/Box';
+import CircularProgress from '@mui/material/CircularProgress'
+import SentimentVeryDissatisfiedIcon from '@mui/icons-material/SentimentVeryDissatisfied';
 
 import {format} from 'date-fns';
 
@@ -28,6 +31,9 @@ const AggregationModal = ({header="Lorem ipsum dolor sit amet consectetur adipis
   const from = (datePeriod.from && format(datePeriod.from, "dd.MM.yyy")) || "начала пандемии";
   const to = (datePeriod.to && format(datePeriod.to, "dd.MM.yyy")) || "последнего дня наблюдений";
 
+  const date = fetchState.data?.data?.date && format(new Date(fetchState.data?.data?.date), "dd.MM.yyyy")
+
+
   return (
     <Modal
       open={open}
@@ -41,6 +47,20 @@ const AggregationModal = ({header="Lorem ipsum dolor sit amet consectetur adipis
           <CardContent>
             <Typography variant="h4" component="div" align="center">{header}</Typography>
             <Typography variant="h5" component="div" align="center">{`За период с ${from} до ${to}`}</Typography>
+            <Box sx={{display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center"}}>
+              {fetchState.loading || (!fetchState.data && !fetchState.error)
+                ? <CircularProgress size="5rem"/>
+                : fetchState.error
+                  ? <>
+                    <SentimentVeryDissatisfiedIcon color="primary" style={{width: "10rem", height: "10rem"}}/>
+                    <Typography variant="h6">{fetchState.error.message}</Typography>
+                  </>
+                  : <>
+                    <Typography variant="h1" component="div">{Math.round(parseFloat(fetchState.data.data.value))}</Typography>
+                    {date ? <Typography variant="h5" component="div">{`За ${date}`}</Typography> : null}
+                  </>
+              }
+            </Box>
           </CardContent>
           <CardActions>
             <Button size="small" onClick={()=>{onClose()}}>Закрыть</Button>
