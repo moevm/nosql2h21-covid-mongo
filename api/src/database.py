@@ -111,6 +111,128 @@ class DataBase:
     def get_vaccinations(self, query):
         return self.get_collection_by_query(self.__vaccinations, query)
 
+    def aggregate(self, collection, field_name, agg_func, query):
+        iso_code = query.get('iso_code', None)
+        date_from = query.get('date_from', None)
+        date_to = query.get('date_to', None)
+        if agg_func is None:
+            return []
+        if agg_func == 'total':
+            agg_func = 'sum'
+        first_stage = self.__get_first_stage_of_aggregate([iso_code] if iso_code else None, date_from, date_to)
+        d = list(collection.aggregate([
+            first_stage, {
+                '$group': {
+                    '_id': '$iso_code',
+                    'value': {
+                        f'${agg_func}': f'${field_name}'
+                    },
+                }
+            }, {
+                '$project': {
+                    '_id': 0,
+                }
+            }
+        ]))[0]
+
+        day = collection.find_one({field_name: d['value']})
+        date = None
+        if day:
+            date = day.get('date', None)
+        if date:
+            d['date'] = date.strftime('%Y-%m-%d')
+        else:
+            d['date'] = None
+
+        if iso_code is None:
+            result = list(collection.aggregate([
+                first_stage, {
+                    '$group': {
+                        '_id': '$date',
+                        'value': {'$sum': f'${field_name}'},
+                    }
+                }
+            ]))
+            dates = [d['_id'] for d in result]
+            print(dates, flush=True)
+            result = [d['value'] for d in result]
+            print(result, flush=True)
+
+            if agg_func == 'avg':
+                d = dict(value=sum(result) / len(result))
+                d['date'] = None
+            elif agg_func == 'sum':
+                d = dict(value=sum(result))
+                d['date'] = None
+            elif agg_func == 'max':
+                d = dict(value=max(result))
+                print(result.index(d['value']), flush=True)
+                d['date'] = dates[result.index(d['value'])].strftime('%Y-%m-%d')
+            elif agg_func == 'min':
+                d = dict(value=min(result))
+                d['date'] = dates[result.index(d['value'])].strftime('%Y-%m-%d')
+        return d
+
+    def aggregate_cases(self, *args):
+        return self.aggregate(self.__cases, 'new_cases', *args)
+
+    def aggregate_vax(self, *args):
+        return self.aggregate(self.__vaccinations, 'new_vaccinations', *args)
+
+    def get_cases_on_density(self, query):
+        first_stage = self.__get_first_stage_of_aggregate(
+            date_from=query.get('date_from', None), date_to=query.get('date_to', None)
+        )
+        result = list(self.__cases.aggregate([
+            first_stage, {
+                '$match': {
+                    'new_cases': {'$gte': 0}
+                }
+            }, {
+                '$group': {
+                    '_id': '$iso_code',
+                    'total_cases': {
+                        '$sum': '$new_cases'
+                    }
+                }
+            }, {
+                '$project': {
+                    'iso_code': '$_id',
+                    'total_cases': '$total_cases',
+                    '_id': 0
+                }
+            }, {
+                '$lookup': {
+                    'from': 'countries',
+                    'localField': 'iso_code',
+                    'foreignField': 'iso_code',
+                    'as': 'countries'
+                }
+            }, {
+                '$project': {
+                    'iso_code': '$iso_code',
+                    'total_cases': '$total_cases',
+                    'country': {
+                        '$arrayElemAt': [
+                            '$countries', 0
+                        ]
+                    }
+                }
+            }, {
+                '$project': {
+                    'iso_code': '$iso_code',
+                    'cases': '$total_cases',
+                    'density': '$country.population_density'
+                }
+            }, {
+                '$match': {
+                    'density': {'$ne': None}
+                }
+            }
+        ]))
+        result.sort(key=operator.itemgetter('density'))
+        return result
+
     def get_cases_per_day(
             self,
             iso_code,

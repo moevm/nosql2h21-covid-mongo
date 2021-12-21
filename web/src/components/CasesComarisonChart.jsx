@@ -48,10 +48,7 @@ const chartOptions = {
     },
     tooltip: {
       displayColors: false,
-      position: "custom",
-      // // callbacks: {
-      // //   afterTitle: (items) => {items.reverse()}
-      // // }
+      position: "top",
     },
   }
 }
@@ -97,7 +94,7 @@ const verticalLinePlugin = {
 }
 
 const tooltipPlugin = Chart.registry.getPlugin('tooltip');
-tooltipPlugin.positioners.custom = function(items) {
+tooltipPlugin.positioners.top = function(items) {
   const pos = tooltipPlugin.positioners.average(items)
 
   if (pos === false) {

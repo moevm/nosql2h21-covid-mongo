@@ -9,13 +9,45 @@ import { useEffect } from 'react';
 
 import useFetch from 'hooks/useFetch';
 import { VACCS_PER_DAY } from 'api/endpoints';
+import {AGGREGATE_VACCS_MIN} from 'api/endpoints';
+import {AGGREGATE_VACCS_MAX} from 'api/endpoints';
+import {AGGREGATE_VACCS_AVG} from 'api/endpoints';
+import {AGGREGATE_VACCS_TOTAL} from 'api/endpoints';
 
 import WorldChart from 'components/WorldChart';
+import AggregationMenu from 'components/AggregationMenu';
+import AggregationModal from 'components/AggregationModal';
+
+
+const zip = (a, b) => a.map((k, i) => [k, b[i]]);
 
 
 const VaccsChart = ({isoCode = null, dateFrom = null, dateTo = null}) => {
+  const [aggregation, setAggregation] = React.useState(null)
+  const [modalOpen, setModalOpen] = React.useState(Boolean(aggregation))
+
   const [vaccs, performVaccsFetch] = useFetch(VACCS_PER_DAY)
 
+  const aggregationFunctions = {
+    sum: "Общее",
+    average: "Среднее",
+    min: "Минимальное",
+    max: "Максимальное",
+  }
+
+  const aggregationFetch = {
+    sum: Object.fromEntries(zip(["status", "performFetch"], useFetch(AGGREGATE_VACCS_TOTAL))),
+    average: Object.fromEntries(zip(["status", "performFetch"], useFetch(AGGREGATE_VACCS_AVG))),
+    min: Object.fromEntries(zip(["status", "performFetch"], useFetch(AGGREGATE_VACCS_MIN))),
+    max: Object.fromEntries(zip(["status", "performFetch"], useFetch(AGGREGATE_VACCS_MAX))),
+  }
+
+  useEffect(()=>{
+    if (aggregation !== null) {
+      setModalOpen(true)
+    }
+  }, [aggregation])
+  
   useEffect(() => {
     performVaccsFetch({
       iso_code: isoCode,
@@ -23,6 +55,18 @@ const VaccsChart = ({isoCode = null, dateFrom = null, dateTo = null}) => {
       date_to: dateTo && formatISO(dateTo, {representation: "date"})
     })
   }, [performVaccsFetch, isoCode, dateFrom, dateTo])
+
+  const handleMenuClick = (key, value) => {
+    aggregationFetch[key].performFetch({
+      iso_code: isoCode,
+      date_from: dateFrom && formatISO(dateFrom, {representation: "date"}),
+      date_to: dateTo && formatISO(dateTo, {representation: "date"})
+    })
+    if (key === aggregation) {
+      setModalOpen(true)
+    }
+    setAggregation(key);
+  }
 
   const loading = () => (
     <Box sx={{display: "flex", width: "100%", height: "100%", justifyContent: "center", alignItems: "center"}}>
@@ -45,7 +89,17 @@ const VaccsChart = ({isoCode = null, dateFrom = null, dateTo = null}) => {
       value_smoothed: item.new_vaccinations_smoothed
     }));
     return (
-      <WorldChart data={data} label="New vaccinated" smoothedLabel="7-day avg" primaryColor="#137333" secondaryColor="#5bb974"/>
+      <Box sx={{width: "100%", height: "100%", position: "relative"}}>
+        <AggregationMenu onMenuClick={handleMenuClick} items={aggregationFunctions}/>
+        <WorldChart data={data} label="New vaccinated" smoothedLabel="7-day avg" primaryColor="#137333" secondaryColor="#5bb974"/>
+        <AggregationModal
+            open={modalOpen}
+            onClose={()=>{setModalOpen(false)}}
+            header={`${aggregationFunctions[aggregation]} количество вакцинированных`}
+            datePeriod={{from: dateFrom, to: dateTo}}
+            fetchState={aggregationFetch[aggregation]?.status || {data: null, loading: false, error: null}}
+          />
+      </Box>
     )
   }
 
