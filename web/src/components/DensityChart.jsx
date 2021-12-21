@@ -1,6 +1,5 @@
 import React from 'react';
 
-import { Chart } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 
 const verticalLinePlugin = {
@@ -52,7 +51,7 @@ const DensityChart = ({data}) => {
           labels: data.map(o => o.density),
           datasets: [{
             data: data.map(o => o.cases),
-            borderColor: "#0000FF"
+            borderColor: "#1976D2"
           }]
         }
       }
