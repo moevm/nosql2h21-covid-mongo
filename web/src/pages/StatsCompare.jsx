@@ -123,7 +123,6 @@ const StatsCompare = () => {
 
   const classes = useStyles();
 
-
   const onCountrySelect = (countryField, countryObj) => {
     dispatch({[countryField]: countryObj})
   }
