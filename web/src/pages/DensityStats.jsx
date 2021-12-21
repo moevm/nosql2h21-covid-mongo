@@ -14,6 +14,9 @@ import SentimentVeryDissatisfiedIcon from '@mui/icons-material/SentimentVeryDiss
 
 import { formatISO } from 'date-fns';
 
+import useFetch from 'hooks/useFetch';
+import {CASES_ON_DENSITY} from 'api/endpoints';
+
 import AspectRatioBox from 'components/AspectRatioBox';
 import DateRangeInput from 'components/ComplexInput/DateRangeInput';
 
@@ -39,6 +42,8 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 const DensityStats = () => {
+  const [chartData, performChartDataFetch] = useFetch(CASES_ON_DENSITY)
+
   const [stateHistory, setStateHistory] = React.useState({
     past: [],
     present: {dateFrom: null, dateTo: null},
@@ -97,20 +102,51 @@ const DensityStats = () => {
     dispatch({...date})
   }
 
+  React.useEffect(() => {
+    const dateFrom = stateHistory.present.dateFrom;
+    const dateTo = stateHistory.present.dateTo;
+    performChartDataFetch({
+      date_from: dateFrom && formatISO(dateFrom, {representation: "date"}),
+      date_to: dateTo && formatISO(dateTo, {representation: "date"})
+    })
+  }, [performChartDataFetch, stateHistory])
+
+  const loading = () => (
+    <Box sx={{display: "flex", width: "100%", height: "100%", justifyContent: "center", alignItems: "center"}}>
+      <CircularProgress size="5rem"/>
+    </Box>
+  )
+
+  const error = (message1, message2) => (
+    <Box sx={{
+      display: "flex",
+      width: "100%",
+      height: "100%",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center"
+    }}>
+      <SentimentVeryDissatisfiedIcon color="primary" style={{width: "10rem", height: "10rem"}}/>
+      <Typography variant="h6">{message1}</Typography>
+      <Typography variant="h6">{message2}</Typography>
+    </Box>
+  )
+
+  const chart = (response) => 
+  {
+    return "Место для вашей рекламы" 
+  }
+
   return (
     <Box className={classes.root}>
       <Paper>
         <AspectRatioBox ratio={16 / 8}>
-          {/* { (stateHistory.present.country1 && stateHistory.present.country2)
-            ? (pairedCases.loading) || (!(pairedCases.data) && !(pairedCases.error))
+          { (chartData.loading) || (!(chartData.data) && !(chartData.error))
               ? loading()
-              : (pairedCases.error)
-                ? error(pairedCases.error?.message)
-                : chart(pairedCases.data)
-            : <Box sx={{display: "flex", width: "100%", height: "100%", justifyContent: "center", alignItems: "center"}}>
-              <Typography variant="h6" component="div">Выберите обе страны</Typography>
-            </Box>
-          } */}
+              : (chartData.error)
+                ? error(chartData.error?.message)
+                : chart(chartData.data)
+          }
         </AspectRatioBox>
       </Paper>
 

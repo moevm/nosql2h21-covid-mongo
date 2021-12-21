@@ -22,6 +22,8 @@ export const AGGREGATE_VACCS_MIN   = "aggregate_vaccs_max"
 export const AGGREGATE_VACCS_AVG   = "aggregate_vaccs_avg"
 export const AGGREGATE_VACCS_TOTAL = "aggregate_vaccs_total"
 
+export const CASES_ON_DENSITY = "cases_on_density"
+
 
 const ENDPOINTS = {
     [CASES_PER_DAY]: {
@@ -31,6 +33,11 @@ const ENDPOINTS = {
 
     [CASES_PER_DAY_COMP]: {
         uri: "/cases-per-day-comp",
+        method: "GET"
+    },
+
+    [CASES_ON_DENSITY]: {
+        uri: "/cases-on-density",
         method: "GET"
     },
 
