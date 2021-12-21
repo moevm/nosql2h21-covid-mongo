@@ -134,22 +134,7 @@ class DataBase:
                 }
             }
         ]))[0]
-        if iso_code is None and agg_func == 'avg':
-            result = list(collection.aggregate([
-                first_stage, {
-                    '$group': {
-                        '_id': '$date',
-                        'value': {'$sum': f'${field_name}'},
-                    }
-                }, {
-                    '$project': {
-                        '_id': 0,
-                    }
-                }
-            ]))
-            size = len(result)
-            sum_ = sum([d['value'] for d in result])
-            d = dict(value=sum_ / size)
+
         day = collection.find_one({field_name: d['value']})
         date = None
         if day:
@@ -158,6 +143,34 @@ class DataBase:
             d['date'] = date.strftime('%Y-%m-%d')
         else:
             d['date'] = None
+
+        if iso_code is None:
+            result = list(collection.aggregate([
+                first_stage, {
+                    '$group': {
+                        '_id': '$date',
+                        'value': {'$sum': f'${field_name}'},
+                    }
+                }
+            ]))
+            dates = [d['_id'] for d in result]
+            print(dates, flush=True)
+            result = [d['value'] for d in result]
+            print(result, flush=True)
+
+            if agg_func == 'avg':
+                d = dict(value=sum(result) / len(result))
+                d['date'] = None
+            elif agg_func == 'sum':
+                d = dict(value=sum(result))
+                d['date'] = None
+            elif agg_func == 'max':
+                d = dict(value=max(result))
+                print(result.index(d['value']), flush=True)
+                d['date'] = dates[result.index(d['value'])].strftime('%Y-%m-%d')
+            elif agg_func == 'min':
+                d = dict(value=min(result))
+                d['date'] = dates[result.index(d['value'])].strftime('%Y-%m-%d')
         return d
 
     def aggregate_cases(self, *args):
